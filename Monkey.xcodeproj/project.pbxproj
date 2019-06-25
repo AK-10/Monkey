@@ -8,6 +8,7 @@
 
 /* Begin PBXFileReference section */
 		11B0C74B22C26CD400197D57 /* Main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Main.swift; sourceTree = "<group>"; };
+		11B0C74C22C26EB100197D57 /* Token.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -15,6 +16,7 @@
 			isa = PBXGroup;
 			children = (
 				11B0C74B22C26CD400197D57 /* Main.swift */,
+				11B0C74C22C26EB100197D57 /* Token.swift */,
 			);
 			sourceTree = "<group>";
 		};
