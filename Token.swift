@@ -11,29 +11,29 @@ import Foundation
 //typealias TokenType = String
 
 enum TokenType: String {
-    case illegal = "ILLEGAL"
-    case eof = "EOF"
+    case _illegal = "ILLEGAL"
+    case _eof = "EOF"
     
 // 識別子 + リテラル
-    case identifier = "IDENT" // add, foobar, x, y, ...
-    case int = "INT" // 12421
+    case _identifier = "IDENT" // add, foobar, x, y, ...
+    case _int = "INT" // 12421
     
 //  演算子
-    case assign = "="
-    case plus = "+"
+    case _assign = "="
+    case _plus = "+"
 
 // デリミタ
-    case comma = ","
-    case semicolon = ";"
+    case _comma = ","
+    case _semicolon = ";"
     
-    case lparen = "("
-    case rparen = ")"
-    case lbrace = "{"
-    case rbrace = "}"
+    case _lparen = "("
+    case _rparen = ")"
+    case _lbrace = "{"
+    case _rbrace = "}"
 
 // キーワード
-    case function = "FUNCTION"
-    case
+    case _function = "FUNCTION"
+    case _let = "let"
     
 }
 
