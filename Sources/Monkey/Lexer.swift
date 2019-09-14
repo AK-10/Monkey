@@ -28,6 +28,10 @@ class Lexer {
     
     func nextToken() -> Optional<Token> {
         var token: Optional<Token> = nil
+        
+        // 空行は特に意味を持たないのでスキップ
+        skipWhiteSpace()
+        
         switch ch {
         case .some(let char):
             let literal = String(char)
@@ -49,54 +53,46 @@ class Lexer {
             case TokenType.rBrace.rawValue:
                 token = Token(.rBrace, literal)
             default:
-                token = Token(.illegal, TokenType.illegal.rawValue)
+                if isLetter(char: char) {
+                    switch readIdentifier() {
+                    case .some(let ident):
+                        let type = Token.lookupIdent(ident: ident)
+                        token = Token(type, ident)
+                    case .none:
+                        fatalError("unexpected character")
+                    }
+                } else {
+                    token = Token(.illegal, TokenType.illegal.rawValue)
+                }
             }
         case .none:
-            token = Token(.eof, "")
+            token = nil
         }
         readChar()
         return token
     }
     
-    func readIdentifier() {
-        switch ch {
-        case .some:
-            readChar()
-        case .none:
-            fatalError("readIdentifier: unexpected value")
+    func readIdentifier() -> String? {
+        let startPosition = position
+        while let char = ch {
+            if isLetter(char: char) {
+                readChar()
+            } else {
+                break
+            }
         }
+        let range = startPosition ..< position
+        
+        return input.read(range)?.description
     }
     
     func isLetter(char: Character) -> Bool {
         return Character("a") <= char && char <= Character("z") || Character("A") <= char && char <= Character("Z") || char == Character("_")
     }
-}
-
-extension String {
-    subscript (i: Int) -> Character? {
-        return i < self.count ? self[index(startIndex, offsetBy: i)] : nil
-    }
-    subscript (bounds: CountableRange<Int>) -> Substring? {
-        let start = index(startIndex, offsetBy: bounds.lowerBound)
-        let end = index(startIndex, offsetBy: bounds.upperBound)
-        return end <= self.endIndex ? self[start ..< end] : nil
-    }
-    subscript (bounds: CountableClosedRange<Int>) -> Substring? {
-        let start = index(startIndex, offsetBy: bounds.lowerBound)
-        let end = index(startIndex, offsetBy: bounds.upperBound)
-        return end <= self.endIndex ? self[start ... end] : nil
-    }
-    subscript (bounds: CountablePartialRangeFrom<Int>) -> Substring? {
-        let start = index(startIndex, offsetBy: bounds.lowerBound)
-        let end = index(endIndex, offsetBy: -1)
-        return end <= self.endIndex ? self[start ... end] : nil
-    }
-    subscript (bounds: PartialRangeThrough<Int>) -> Substring? {
-        let end = index(startIndex, offsetBy: bounds.upperBound)
-        return end <= self.endIndex ? self[startIndex ... end] : nil
-    }
-    subscript (bounds: PartialRangeUpTo<Int>) -> Substring? {
-        let end = index(startIndex, offsetBy: bounds.upperBound)
-        return end <= self.endIndex ? self[startIndex ..< end] : nil
+    
+    func skipWhiteSpace() {
+        while ch == Character(" ") || ch == Character("\n") || ch == Character("\t")  || ch == Character("\r") {
+            readChar()
+        }
     }
 }
