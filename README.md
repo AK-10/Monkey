@@ -7,3 +7,5 @@
 
 ## history
 - xcodeで補完がされない現象を解消(2019/8/9)
+- tokenを実装(2019/?/?)
+- WIP: lexer実装(paren, brace, =+等のoperator, 変数を取得可能, whitespeceをスキップ)　(2019/9/14)
