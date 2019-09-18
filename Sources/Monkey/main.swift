@@ -15,12 +15,8 @@ let result = add(five, ten);
 //let input = "=+(){},;"
 let lexer = Lexer(_input: input)
 
-while true {
-    if let token = lexer.nextToken() {
-        print(token)
-    } else {
-        break
-    }
+while let token = lexer.nextToken() {
+   print(token)
 }
 
 
