@@ -61,6 +61,14 @@ class Lexer {
                     case .none:
                         fatalError("unexpected character")
                     }
+                } else if isDigit(char: char) {
+                    switch readNumber() {
+                    case .some(let number):
+                        let type = TokenType.int
+                        token = Token(type, number)
+                    case .none:
+                        fatalError("unexpected character")
+                    }
                 } else {
                     token = Token(.illegal, TokenType.illegal.rawValue)
                 }
@@ -72,7 +80,11 @@ class Lexer {
         return token
     }
     
-    func readIdentifier() -> String? {
+    private func isLetter(char: Character) -> Bool {
+        return Character("a") <= char && char <= Character("z") || Character("A") <= char && char <= Character("Z") || char == Character("_")
+    }
+    
+    private func readIdentifier() -> String? {
         let startPosition = position
         while let char = ch {
             if isLetter(char: char) {
@@ -86,13 +98,27 @@ class Lexer {
         return input.read(range)?.description
     }
     
-    func isLetter(char: Character) -> Bool {
-        return Character("a") <= char && char <= Character("z") || Character("A") <= char && char <= Character("Z") || char == Character("_")
-    }
-    
-    func skipWhiteSpace() {
+    private func skipWhiteSpace() {
         while ch == Character(" ") || ch == Character("\n") || ch == Character("\t")  || ch == Character("\r") {
             readChar()
         }
+    }
+    
+    private func isDigit(char: Character) -> Bool {
+        return Character("0") <= char && char <= Character("9")
+    }
+    
+    private func readNumber() -> String? {
+        let startPosition = position
+        while let char = ch {
+            if isDigit(char: char) {
+                readChar()
+            } else {
+                break
+            }
+        }
+        let range = startPosition ..< position
+        
+        return input.read(range)?.description
     }
 }
