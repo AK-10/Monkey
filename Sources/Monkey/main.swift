@@ -18,5 +18,3 @@ let lexer = Lexer(_input: input)
 while let token = lexer.nextToken() {
    print(token)
 }
-
-
