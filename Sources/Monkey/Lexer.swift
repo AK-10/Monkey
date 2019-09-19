@@ -36,8 +36,18 @@ class Lexer {
         case .some(let char):
             let literal = String(char)
             switch literal {
+            // 一文字トークン
             case TokenType.assign.rawValue:
-                token = Token(.assign, literal)
+                switch peekChar() {
+                case .some(let nextChar):
+                    if nextChar == Character("=") {
+                        token = Token(.eq, String([char, nextChar]))
+                    } else {
+                        token = Token(.assign, literal)
+                    }
+                case .none:
+                    fatalError("unexpected character")
+                }
             case TokenType.semicolon.rawValue:
                 token = Token(.semicolon, literal)
             case TokenType.lParen.rawValue:
@@ -46,16 +56,40 @@ class Lexer {
                 token = Token(.rParen, literal)
             case TokenType.comma.rawValue:
                 token = Token(.comma, literal)
-            case TokenType.plus.rawValue:
-                token = Token(.plus, literal)
             case TokenType.lBrace.rawValue:
                 token = Token(.lBrace, literal)
             case TokenType.rBrace.rawValue:
                 token = Token(.rBrace, literal)
+            case TokenType.plus.rawValue:
+                token = Token(.plus, literal)
+            case TokenType.minus.rawValue:
+                token = Token(.minus, literal)
+            case TokenType.bang.rawValue:
+                
+                switch peekChar() {
+                case .some(let nextChar):
+                    if nextChar == Character("=") {
+                        token = Token(.notEq, String([char, nextChar]))
+                    } else {
+                        token = Token(.bang, literal)
+                    }
+                case .none:
+                    fatalError("unexpected character")
+                }
+            case TokenType.asterisk.rawValue:
+                token = Token(.asterisk, literal)
+            case TokenType.slash.rawValue:
+                token = Token(.slash, literal)
+            case TokenType.lt.rawValue:
+                token = Token(.lt, literal)
+            case TokenType.gt.rawValue:
+                token = Token(.gt, literal)
+
             default:
                 if isLetter(char: char) {
                     switch readIdentifier() {
                     case .some(let ident):
+                        // キーワードトークン
                         let type = Token.lookupIdent(ident: ident)
                         token = Token(type, ident)
                     case .none:
@@ -120,5 +154,10 @@ class Lexer {
         let range = startPosition ..< position
         
         return input.read(range)?.description
+    }
+    
+    // 覗き見するだけ
+    private func peekChar() -> Character? {
+        return input[readPosition]
     }
 }

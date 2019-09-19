@@ -18,7 +18,13 @@ struct Token {
     
     static func lookupIdent(ident: String) -> TokenType {
         let keywords = ["fn": TokenType.function,
-                        "let": TokenType._let]
+                        "let": TokenType._let,
+                        "true": TokenType._true,
+                        "false": TokenType._false,
+                        "if": TokenType._if,
+                        "else": TokenType._else,
+                        "return": TokenType._return
+                        ]
         guard let type = keywords[ident] else {
             return TokenType.ident
         }

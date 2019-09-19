@@ -16,6 +16,13 @@ enum TokenType: String {
     
     case assign = "="
     case plus = "+"
+    case minus = "-"
+    case bang = "!"
+    case asterisk = "*"
+    case slash = "/"
+    
+    case lt = "<"
+    case gt = ">"
     
     case comma = ","
     case semicolon = ";"
@@ -27,4 +34,13 @@ enum TokenType: String {
     
     case function = "FUNCTION"
     case _let = "LET"
+    
+    case _true = "TRUE"
+    case _false = "FALSE"
+    case _if = "IF"
+    case _else = "ELSE"
+    case _return = "RETURN"
+    
+    case eq = "=="
+    case notEq = "!="
 }

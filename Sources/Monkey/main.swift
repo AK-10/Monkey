@@ -9,6 +9,15 @@ let add = fn(x, y) {
   x + y;
 };
 
+if (5 < 10) {
+  return true;
+} else {
+  return false;
+}
+
+10 == 10;
+10 != 9;
+
 let result = add(five, ten);
 """
 
