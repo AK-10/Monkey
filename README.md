@@ -12,3 +12,8 @@
 - lexer実装, 数値リテラルからトークンを取得 (2019/9/19)
 - lexer実装, `==`, `!=`をトークンとして取得 (2019/9/19)
 - repl実装 (2019/9/20)
+
+## swiftPM
+- `$ mkdir {projectName}`: プロジェクトディレクトリ作成
+- `$ swift package init --type executable`: swiftPMで初期化, executable指定でmainが作成される
+- `$ swift generate-xcodeproj`: xcodeproj作成
