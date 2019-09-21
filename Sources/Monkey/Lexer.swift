@@ -13,7 +13,7 @@ class Lexer {
     var readPosition: Int // これから読み込む位置（現在の次の位置）
     var ch: Character? // 現在検査中の文字
     
-    init(_input: String) {
+    init(_ _input: String) {
         input = _input
         position = 0
         readPosition = position + 1
