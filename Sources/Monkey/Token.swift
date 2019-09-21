@@ -1,5 +1,5 @@
 //
-//  Token.swift
+//  TokenType.swift
 //  Monkey
 //
 //  Created by Atsushi KONISHI on 2019/09/10.
@@ -7,24 +7,27 @@
 
 import Foundation
 
-enum Token: String {
-    case illegal = "ILLEGAL"
-    case eof = "EOF"
+struct Token {
+    let type: TokenType
+    let literal: String
     
-    case ident = "IDENT" // add, foobar, x, y, ...
-    case int = "INT" // 123456
+    init(_ _type: TokenType, _ _literal: String) {
+        type = _type
+        literal = _literal
+    }
     
-    case assign = "="
-    case plus = "+"
-    
-    case comma = ","
-    case semicolon = ";"
-    
-    case lParen = "("
-    case rParen = ")"
-    case lBrace = "{"
-    case rBrace = "}"
-    
-    case function = "FUNCTION"
-    case _let = "LET"
+    static func lookupIdent(ident: String) -> TokenType {
+        let keywords = ["fn": TokenType.function,
+                        "let": TokenType._let,
+                        "true": TokenType._true,
+                        "false": TokenType._false,
+                        "if": TokenType._if,
+                        "else": TokenType._else,
+                        "return": TokenType._return
+                        ]
+        guard let type = keywords[ident] else {
+            return TokenType.ident
+        }
+        return type
+    }
 }
