@@ -26,8 +26,8 @@ class Lexer {
         readPosition += 1
     }
     
-    func nextToken() -> Optional<Token> {
-        var token: Optional<Token> = nil
+    func nextToken() -> Token? {
+        var token: Token? = nil
         
         // 空行は特に意味を持たないのでスキップ
         skipWhiteSpace()

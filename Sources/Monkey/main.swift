@@ -1,5 +1,4 @@
 import Foundation
 
-//Repl().start()
+Repl().start()
 
-print(NSDecimalNumber.maximum.description(withLocale: nil))

@@ -11,16 +11,18 @@ protocol Node {
     func tokenLiteral() -> String
 }
 
+// 文
 protocol Statement: Node {
     func statementNode()
 }
 
+// 式
 protocol Expression: Node {
     func expressionNode()
 }
 
 struct Program {
-    var statements: [Statement]
+    let statements: [Statement]
 
     func TokenLiteral() -> String {
         switch statements.first {

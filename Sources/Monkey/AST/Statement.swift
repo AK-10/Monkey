@@ -7,10 +7,6 @@
 
 import Foundation
 
-struct Identifier {
-    let token: Token
-}
-
 struct LetStatement: Statement {
     let token: Token
     let name: Identifier
@@ -20,6 +16,5 @@ struct LetStatement: Statement {
         return token.literal
     }
 
-    
     func statementNode() {}
 }
