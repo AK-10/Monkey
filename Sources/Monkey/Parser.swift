@@ -7,11 +7,19 @@
 
 import Foundation
 
+struct DummyExpression: Expression {
+    func expressionNode() {}
+    
+    func tokenLiteral() -> String {
+        return "dummy"
+    }
+}
+
 class Parser {
     let lexer: Lexer
-    var currentToken: Token? = nil
-    var peekToken: Token? = nil
-    
+    private var currentToken: Token? = nil
+    private var peekToken: Token? = nil
+    var errors: [String] = []
     init(_ lexer: Lexer) {
         self.lexer = lexer
         nextToken()
@@ -40,6 +48,11 @@ class Parser {
         peekToken = lexer.nextToken()
     }
     
+    private func peekError(tokenType: TokenType) {
+        let msg = "expected next token to be \(tokenType.rawValue), got \(peekToken?.type.rawValue ?? "") instead"
+        errors.append(msg)
+    }
+    
     private func parseStatement() -> Statement? {
         guard let curToken = currentToken else { return nil }
         switch curToken.type {
@@ -56,22 +69,35 @@ class Parser {
         if !expectPeek(tokenType: .ident) {
             return nil
         }
-        
+
         switch currentToken {
         case .some(let curToken):
             let name = Identifier(token: curToken, value: curToken.literal)
             if !expectPeek(tokenType: .assign) {
                 return nil
             }
-            // TODO: セミコロンに遭遇するまで指揮を読み飛ばしている
+            // TODO: セミコロンに遭遇するまで式を読み飛ばしている
             while !curTokenIs(tokenType: .semicolon) {
                 nextToken()
             }
             // TODO: valueに正しい値を入れる（現状nameを入れている）
-            return LetStatement(token: rootToken, name: name, value: name)
+            return LetStatement(token: rootToken, name: name, value: DummyExpression())
         case .none:
             return nil
         }
+    }
+    
+    private func parseReturnStatement() -> ReturnStatement? {
+        guard let rootToken = currentToken else { return nil }
+        
+        nextToken()
+        
+        // TODO: セミコロンに遭遇するまで式を読み飛ばしている
+        while !curTokenIs(tokenType: .semicolon) {
+            nextToken()
+        }
+        
+        return ReturnStatement(token: rootToken, returnValue: DummyExpression())
     }
     
     private func expectPeek(tokenType: TokenType) -> Bool {
