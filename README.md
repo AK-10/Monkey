@@ -31,7 +31,7 @@
   - let文のBNF(?)
 
 ```bnf
-letStatement ::= let <identifier> = <expression>
+<letStatement> ::= let <identifier> = <expression>
 
 ```
   - tokenをparseし，うえのBNFを満たす場合LetStatementを返す.
@@ -40,7 +40,7 @@ letStatement ::= let <identifier> = <expression>
   - return文のBNF(?)
 
 ```bnf
-returnStatement ::= return <expression>
+<returnStatement> ::= return <expression>
 ```
   - tokenをparseし，うえのBNFを満たす場合LetStatementを返す.
 
@@ -54,17 +54,18 @@ returnStatement ::= return <expression>
 
 ## Swiftで書き直すに当たって
 - ASTはenum(代数的データ型)で書き換えれそう
-- なんとなくのメモ
+- なんとなくのメモ(あとでちゃんと書く)
 
 statement
 ```swift
 enum Statement {
-  case _return()
+  case _return(value: Expression)
   case _let()
-  case 
+  case expression()
 ```
 
 expression
 ```
-enum
+enum Expression {
+  case
 ```
