@@ -12,8 +12,60 @@
 - lexer実装, 数値リテラルからトークンを取得 (2019/9/19)
 - lexer実装, `==`, `!=`をトークンとして取得 (2019/9/19)
 - repl実装 (2019/9/20)
+- parser実装取り掛かり(2019/10/14)
+  - Node, Statement, Expressionプロトコルを記述
+  - Program構造体を実装
+    - Programはparserが生成するASTのルートノードになる
+    - `let x = 10; let y = 20;`が与えられた場合，以下のようになると思っていい
+```
+      program -+- let --+-- identifier(x)
+               |        |
+               |        |-- value(int: 10)
+               |
+               |- let --+-- identifier(y)
+                        |
+                        |-- value(int: 20)
+```
+      
+- LetStatementのパース(2019/10/17)
+  - let文のBNF(?)
+
+```bnf
+<letStatement> ::= let <identifier> = <expression>
+
+```
+  - tokenをparseし，うえのBNFを満たす場合LetStatementを返す.
+
+- ReturnStetementのパース(2019/10/18)
+  - return文のBNF(?)
+
+```bnf
+<returnStatement> ::= return <expression>
+```
+  - tokenをparseし，うえのBNFを満たす場合LetStatementを返す.
+
+
 
 ## swiftPM
 - `$ mkdir {projectName}`: プロジェクトディレクトリ作成
 - `$ swift package init --type executable`: swiftPMで初期化, executable指定でmainが作成される
 - `$ swift generate-xcodeproj`: xcodeproj作成
+
+
+## Swiftで書き直すに当たって
+- ASTはenum(代数的データ型)で書き換えれそう
+- なんとなくのメモ(あとでちゃんと書く)
+
+statement
+```swift
+enum Statement {
+  case _return(value: Expression)
+  case _let()
+  case expression()
+```
+
+expression
+```
+enum Expression {
+  case
+```
