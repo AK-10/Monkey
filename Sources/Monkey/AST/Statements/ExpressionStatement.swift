@@ -22,6 +22,4 @@ struct ExpressionStatement: Statement {
     func tokenLiteral() -> String {
         return ""
     }
-    
-
 }

@@ -7,8 +7,18 @@
 
 import Foundation
 
-typealias PrefixParseFunc = () -> Expression
-typealias InfixParseFunc = (Expression) -> Expression
+typealias PrefixParseFunc = () -> Expression?
+typealias InfixParseFunc = (Expression) -> Expression?
+
+enum EvalPriority: Int {
+    case lowest
+    case equals // ==
+    case less_greater // < or >
+    case sum  // +
+    case product // *
+    case prefix // -(value) or !(value)
+    case call // myFunction(x)
+}
 
 struct DummyExpression: Expression {
     var description: String {
@@ -35,6 +45,9 @@ class Parser {
         self.lexer = lexer
         nextToken()
         nextToken()
+        
+        registerPrefix(tokenType: .ident, fn: parseIdentifier)
+        registerPrefix(tokenType: .int, fn: parseIntegerLiteral)
     }
     
     func parseProgram() -> Program {
@@ -48,27 +61,17 @@ class Parser {
         }
         return Program(statements: statements)
     }
-    
-    private func nextToken() {
-        switch peekToken {
-        case .some(let token):
-            self.currentToken = token
-        case .none:
-            break
-        }
-        peekToken = lexer.nextToken()
-    }
-    
-    private func peekError(tokenType: TokenType) {
-        let msg = "expected next token to be \(tokenType.rawValue), got \(peekToken?.type.rawValue ?? "") instead"
-        errors.append(msg)
-    }
-    
+}
+
+// parse処理 (semantic code)
+extension Parser {
     private func parseStatement() -> Statement? {
         guard let curToken = currentToken else { return nil }
         switch curToken.type {
         case ._let:
             return parseLetStatement()
+        case ._return:
+            return parseReturnStatement()
         default:
             return nil
             
@@ -109,6 +112,58 @@ class Parser {
         }
         
         return ReturnStatement(token: rootToken, returnValue: DummyExpression())
+    }
+    
+    private func parseExpressionStatement() -> ExpressionStatement? {
+        guard let rootToken = currentToken else { return nil }
+        guard let expr = parseExpression(priority: .lowest) else { return nil }
+        
+        // セミコロンの一つ前まで進む
+        while !peekTokenIs(tokenType: .semicolon) {
+            nextToken()
+        }
+        
+        return ExpressionStatement(token: rootToken, expr: expr)
+    }
+    
+    private func parseExpression(priority: EvalPriority) -> Expression? {
+        guard let curToken = currentToken, let prefix = prefixParseFuncs[curToken.type] else { return nil }
+        return prefix()
+    }
+    
+    private func parseIdentifier() -> Expression? {
+        guard let curToken = currentToken else { return nil }
+        return Identifier(token: curToken, value: curToken.literal)
+    }
+    
+    private func parseIntegerLiteral() -> Expression? {
+        guard let curToken = currentToken else { return nil }
+        let literal = Int(curToken.literal)
+        switch literal {
+        case .some(let lit):
+            return IntegerLiteral(token: curToken, value: lit)
+        case .none:
+            errors.append("could not parse \(curToken.literal) as Integer")
+            return nil
+        }
+    }
+}
+
+// util系
+extension Parser {
+    private func nextToken() {
+        switch peekToken {
+        case .some(let token):
+            self.currentToken = token
+        case .none:
+            break
+        }
+        peekToken = lexer.nextToken()
+    }
+    
+    private func peekError(tokenType: TokenType) {
+        let msg = "expected next token to be \(tokenType.rawValue), got \(peekToken?.type.rawValue ?? "") instead"
+        errors.append(msg)
     }
     
     private func expectPeek(tokenType: TokenType) -> Bool {
