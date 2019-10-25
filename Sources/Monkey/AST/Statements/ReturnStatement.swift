@@ -8,8 +8,13 @@
 import Foundation
 
 struct ReturnStatement: Statement {
+    
     let token: Token
     let returnValue: Expression
+
+    var description: String {
+        return "\(tokenLiteral()) \(returnValue.description);"
+    }
     
     func statementNode() {}
     

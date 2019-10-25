@@ -8,6 +8,10 @@
 import Foundation
 
 struct DummyExpression: Expression {
+    var description: String {
+        return "dummy expr"
+    }
+    
     func expressionNode() {}
     
     func tokenLiteral() -> String {

@@ -8,10 +8,15 @@
 import Foundation
 
 struct LetStatement: Statement {
+    
     let token: Token
     let name: Identifier
     let value: Expression
 
+    var description: String {
+        return "\(tokenLiteral()) \(name.description) = \(value.description);"
+    }
+    
     func tokenLiteral() -> String {
         return token.literal
     }

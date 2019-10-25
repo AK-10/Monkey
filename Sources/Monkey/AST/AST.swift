@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol Node {
+protocol Node: CustomStringConvertible {
     func tokenLiteral() -> String
 }
 
@@ -16,10 +16,13 @@ protocol Expression: Node {
     func expressionNode()
 }
 
-struct Program {
+struct Program: Node {
     let statements: [Statement]
-
-    func TokenLiteral() -> String {
+    var description: String {
+        return statements.reduce("") { $0 + $1.description + "\n" }
+    }
+    
+    func tokenLiteral() -> String {
         switch statements.first {
         case .some(let statement):
             return statement.tokenLiteral()
