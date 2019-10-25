@@ -7,6 +7,9 @@
 
 import Foundation
 
+typealias PrefixParseFunc = () -> Expression
+typealias InfixParseFunc = (Expression) -> Expression
+
 struct DummyExpression: Expression {
     var description: String {
         return "dummy expr"
@@ -24,6 +27,10 @@ class Parser {
     private var currentToken: Token? = nil
     private var peekToken: Token? = nil
     var errors: [String] = []
+    
+    var prefixParseFuncs: [TokenType : PrefixParseFunc] = [:]
+    var infixParseFuncs: [TokenType : InfixParseFunc] = [:]
+    
     init(_ lexer: Lexer) {
         self.lexer = lexer
         nextToken()
@@ -120,5 +127,15 @@ class Parser {
     private func peekTokenIs(tokenType: TokenType) -> Bool {
         guard let peekToken = peekToken else { return false }
         return peekToken.type == tokenType
+    }
+    
+    // semantic codeを追加するための関数(prefix)
+    private func registerPrefix(tokenType: TokenType, fn: @escaping PrefixParseFunc) {
+        prefixParseFuncs[tokenType] = fn
+    }
+
+    // semantic codeを追加するための関数(infix)
+    private func registerInfix(tokenType: TokenType, fn: @escaping InfixParseFunc) {
+        infixParseFuncs[tokenType] = fn
     }
 }

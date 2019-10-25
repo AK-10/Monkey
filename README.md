@@ -44,6 +44,12 @@
 ```
   - tokenをparseし，うえのBNFを満たす場合LetStatementを返す.
 
+- 式のパース(2019/10/26)
+  - pratt構文解析
+    - tokentypeごとにparse関数(semantic code)を呼ぶ
+    - 適切な式を構文解析し，その式をg表現するASTを返す．
+    - parse関数は最大二つ(prefix operator, infix operator)
+    
 
 
 ## swiftPM
