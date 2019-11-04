@@ -14,9 +14,8 @@ struct Repl {
             if let input = readLine() {
                 if input == "bye" { exit(0) }
                 let lexer = Lexer(input)
-                while let token = lexer.nextToken() {
-                    print(token)
-                }
+                let parser = Parser(lexer)
+                let program = parser.parseProgram()
             }
         }
     }

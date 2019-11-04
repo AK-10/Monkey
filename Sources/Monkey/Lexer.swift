@@ -65,7 +65,6 @@ class Lexer {
             case TokenType.minus.rawValue:
                 token = Token(.minus, literal)
             case TokenType.bang.rawValue:
-                
                 switch peekChar() {
                 case .some(let nextChar):
                     if nextChar == Character("=") {

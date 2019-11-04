@@ -34,8 +34,17 @@ struct DummyExpression: Expression {
 
 class Parser {
     let lexer: Lexer
-    private var currentToken: Token? = nil
-    private var peekToken: Token? = nil
+    private var currentToken: Token? = nil {
+        didSet {
+//            print("changed currentToken: \(oldValue) -> \(currentToken)")
+        }
+    }
+    
+    private var peekToken: Token? = nil {
+        didSet {
+//            print("changed peekToken: \(oldValue) -> \(peekToken)")
+        }
+    }
     var errors: [String] = []
     
     var prefixParseFuncs: [TokenType : PrefixParseFunc] = [:]
@@ -48,11 +57,13 @@ class Parser {
         
         registerPrefix(tokenType: .ident, fn: parseIdentifier)
         registerPrefix(tokenType: .int, fn: parseIntegerLiteral)
+        registerPrefix(tokenType: .minus, fn: parsePrefixExpression)
+        registerPrefix(tokenType: .bang, fn: parsePrefixExpression)
     }
     
     func parseProgram() -> Program {
         var statements: [Statement] = []
-        while let curToken = currentToken, curToken.type == .eof {
+        while currentToken != nil {
             let stmt = parseStatement()
             if let stmt = stmt {
                 statements.append(stmt)
@@ -66,6 +77,7 @@ class Parser {
 // parse処理 (semantic code)
 extension Parser {
     private func parseStatement() -> Statement? {
+        print("parseStatement")
         guard let curToken = currentToken else { return nil }
         switch curToken.type {
         case ._let:
@@ -74,12 +86,13 @@ extension Parser {
             return parseReturnStatement()
         default:
             return nil
-            
         }
     }
     
     private func parseLetStatement() -> LetStatement? {
+        // rootToken: これはletのはず
         guard let rootToken = currentToken else { return nil }
+        print(rootToken)
         if !expectPeek(tokenType: .ident) {
             return nil
         }
@@ -87,11 +100,15 @@ extension Parser {
         switch currentToken {
         case .some(let curToken):
             let name = Identifier(token: curToken, value: curToken.literal)
+            print(curToken)
+            print(peekToken)
             if !expectPeek(tokenType: .assign) {
                 return nil
             }
             // TODO: セミコロンに遭遇するまで式を読み飛ばしている
             while !curTokenIs(tokenType: .semicolon) {
+                curTokenIs(tokenType: .semicolon)
+                print(currentToken)
                 nextToken()
             }
             // TODO: valueに正しい値を入れる（現状nameを入れている）
@@ -127,7 +144,12 @@ extension Parser {
     }
     
     private func parseExpression(priority: EvalPriority) -> Expression? {
-        guard let curToken = currentToken, let prefix = prefixParseFuncs[curToken.type] else { return nil }
+        guard let curToken = currentToken else { return nil }
+        guard let prefix = prefixParseFuncs[curToken.type] else {
+            // append error
+            noPrefixParseFuncError(tokenType: curToken.type)
+            return nil
+        }
         return prefix()
     }
     
@@ -147,17 +169,25 @@ extension Parser {
             return nil
         }
     }
+    
+    private func parsePrefixExpression() -> Expression? {
+        guard let curToken = currentToken else { return nil }
+        
+        nextToken()
+        
+        guard let right = parseExpression(priority: .prefix) else {
+            let msg = "\(curToken.literal) operand is nil"
+            errors.append(msg)
+            return nil
+        }
+        return PrefixExpression(token: curToken, op: curToken.literal, right: right)
+    }
 }
 
 // util系
 extension Parser {
     private func nextToken() {
-        switch peekToken {
-        case .some(let token):
-            self.currentToken = token
-        case .none:
-            break
-        }
+        self.currentToken = peekToken
         peekToken = lexer.nextToken()
     }
     
@@ -192,5 +222,10 @@ extension Parser {
     // semantic codeを追加するための関数(infix)
     private func registerInfix(tokenType: TokenType, fn: @escaping InfixParseFunc) {
         infixParseFuncs[tokenType] = fn
+    }
+    
+    private func noPrefixParseFuncError(tokenType: TokenType) {
+        let msg = "no prefix parse function for \(tokenType.rawValue) found"
+        errors.append(msg)
     }
 }

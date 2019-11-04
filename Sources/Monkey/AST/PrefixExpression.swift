@@ -1,5 +1,5 @@
 //
-//  IntegerLiteral.swift
+//  PrefixExpression.swift
 //  Monkey
 //
 //  Created by Atsushi KONISHI on 2019/10/26.
@@ -7,12 +7,13 @@
 
 import Foundation
 
-struct IntegerLiteral: Expression {
-    let token: Token
-    let value: Int
-    
+struct PrefixExpression: Expression {
+    let token: Token // !, -など
+    let op: String
+    let right: Expression
+
     var description: String {
-        return "Int: \(token.literal)"
+        return "prefix operator: (\(op)\(right.description))"
     }
     
     func expressionNode() {
