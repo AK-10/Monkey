@@ -21,6 +21,7 @@ class Lexer {
     }
     
     func readChar() {
+        print(ch)
         ch = input[readPosition]
         position = readPosition
         readPosition += 1
@@ -48,24 +49,32 @@ class Lexer {
                 case .none:
                     fatalError("unexpected character")
                 }
+                readChar()
             case TokenType.semicolon.rawValue:
                 token = Token(.semicolon, literal)
+                readChar()
             case TokenType.lParen.rawValue:
                 token = Token(.lParen, literal)
+                readChar()
             case TokenType.rParen.rawValue:
                 token = Token(.rParen, literal)
+                readChar()
             case TokenType.comma.rawValue:
                 token = Token(.comma, literal)
+                readChar()
             case TokenType.lBrace.rawValue:
                 token = Token(.lBrace, literal)
+                readChar()
             case TokenType.rBrace.rawValue:
                 token = Token(.rBrace, literal)
+                readChar()
             case TokenType.plus.rawValue:
                 token = Token(.plus, literal)
+                readChar()
             case TokenType.minus.rawValue:
                 token = Token(.minus, literal)
+                readChar()
             case TokenType.bang.rawValue:
-                
                 switch peekChar() {
                 case .some(let nextChar):
                     if nextChar == Character("=") {
@@ -76,15 +85,19 @@ class Lexer {
                 case .none:
                     fatalError("unexpected character")
                 }
+                readChar()
             case TokenType.asterisk.rawValue:
                 token = Token(.asterisk, literal)
+                readChar()
             case TokenType.slash.rawValue:
                 token = Token(.slash, literal)
+                readChar()
             case TokenType.lt.rawValue:
                 token = Token(.lt, literal)
+                readChar()
             case TokenType.gt.rawValue:
                 token = Token(.gt, literal)
-
+                readChar()
             default:
                 if isLetter(char: char) {
                     switch readIdentifier() {
@@ -110,7 +123,6 @@ class Lexer {
         case .none:
             token = nil
         }
-        readChar()
         return token
     }
     
