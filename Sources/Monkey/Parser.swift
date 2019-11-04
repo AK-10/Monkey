@@ -77,7 +77,6 @@ class Parser {
 // parse処理 (semantic code)
 extension Parser {
     private func parseStatement() -> Statement? {
-        print("parseStatement")
         guard let curToken = currentToken else { return nil }
         switch curToken.type {
         case ._let:
@@ -92,7 +91,6 @@ extension Parser {
     private func parseLetStatement() -> LetStatement? {
         // rootToken: これはletのはず
         guard let rootToken = currentToken else { return nil }
-        print(rootToken)
         if !expectPeek(tokenType: .ident) {
             return nil
         }
@@ -100,15 +98,11 @@ extension Parser {
         switch currentToken {
         case .some(let curToken):
             let name = Identifier(token: curToken, value: curToken.literal)
-            print(curToken)
-            print(peekToken)
             if !expectPeek(tokenType: .assign) {
                 return nil
             }
             // TODO: セミコロンに遭遇するまで式を読み飛ばしている
             while !curTokenIs(tokenType: .semicolon) {
-                curTokenIs(tokenType: .semicolon)
-                print(currentToken)
                 nextToken()
             }
             // TODO: valueに正しい値を入れる（現状nameを入れている）
@@ -171,16 +165,16 @@ extension Parser {
     }
     
     private func parsePrefixExpression() -> Expression? {
-        guard let curToken = currentToken else { return nil }
+        guard let prefixOperatorToken = currentToken else { return nil }
         
         nextToken()
         
         guard let right = parseExpression(priority: .prefix) else {
-            let msg = "\(curToken.literal) operand is nil"
+            let msg = "\(prefixOperatorToken.literal) operand is nil"
             errors.append(msg)
             return nil
         }
-        return PrefixExpression(token: curToken, op: curToken.literal, right: right)
+        return PrefixExpression(token: prefixOperatorToken, op: prefixOperatorToken.literal, right: right)
     }
 }
 
