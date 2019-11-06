@@ -8,12 +8,13 @@
 import Foundation
 
 struct ExpressionStatement: Statement {
-    var description: String {
-        return ""
-    }
     
     let token: Token // 式の最初のトークン
     let expr: Expression
+    
+    var description: String {
+        return expr.description
+    }
     
     func statementNode() {
     }
@@ -21,6 +22,4 @@ struct ExpressionStatement: Statement {
     func tokenLiteral() -> String {
         return ""
     }
-    
-
 }

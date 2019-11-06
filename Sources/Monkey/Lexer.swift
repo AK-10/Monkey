@@ -21,7 +21,6 @@ class Lexer {
     }
     
     func readChar() {
-        print(ch)
         ch = input[readPosition]
         position = readPosition
         readPosition += 1
