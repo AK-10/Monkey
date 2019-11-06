@@ -58,7 +58,9 @@
 ```swift
 <pre opertor> <expression>
 ```
-    
+
+- 前置オペレータのparse (2020/11/4)
+  - parsePrefixOperatorメソッドをparseExpressionに食わせるだけ
 
 ## swiftPM
 - `$ mkdir {projectName}`: プロジェクトディレクトリ作成

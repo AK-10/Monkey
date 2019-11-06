@@ -13,7 +13,7 @@ struct PrefixExpression: Expression {
     let right: Expression
 
     var description: String {
-        return "prefix operator: (\(op)\(right.description))"
+        return "prefix operator: (\(op) \(right.description))"
     }
     
     func expressionNode() {

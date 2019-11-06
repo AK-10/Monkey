@@ -16,6 +16,7 @@ struct Repl {
                 let lexer = Lexer(input)
                 let parser = Parser(lexer)
                 let program = parser.parseProgram()
+                print(program.description)
             }
         }
     }
