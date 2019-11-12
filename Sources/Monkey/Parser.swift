@@ -72,6 +72,10 @@ class Parser {
 
         // integer
         registerPrefix(tokenType: .int, fn: parseIntegerLiteral)
+        
+        // bool
+        registerPrefix(tokenType: ._true, fn: parseBoolLiteral)
+        registerPrefix(tokenType: ._false, fn: parseBoolLiteral)
 
         // prefix operator
         registerPrefix(tokenType: .minus, fn: parsePrefixExpression)
@@ -105,19 +109,21 @@ class Parser {
 extension Parser {
     private func parseStatement() -> Statement? {
         guard let curToken = currentToken else { return nil }
+        print("invoke: parseStatement")
         switch curToken.type {
         case ._let:
             return parseLetStatement()
         case ._return:
             return parseReturnStatement()
         default:
-            return nil
+            return parseExpressionStatement()
         }
     }
     
     private func parseLetStatement() -> LetStatement? {
         // rootToken: これはletのはず
         guard let rootToken = currentToken else { return nil }
+        print("invoke: parseLetStatement")
         if !expectPeek(tokenType: .ident) {
             return nil
         }
@@ -155,7 +161,7 @@ extension Parser {
     private func parseExpressionStatement() -> ExpressionStatement? {
         guard let rootToken = currentToken else { return nil }
         guard let expr = parseExpression(precedence: .lowest) else { return nil }
-        
+        print("invoke: parseExpressionStatement")
         // セミコロンの一つ前まで進む
         while !peekTokenIs(tokenType: .semicolon) {
             nextToken()
@@ -171,8 +177,15 @@ extension Parser {
             noPrefixParseFuncError(tokenType: curToken.type)
             return nil
         }
-        
+        print("invoke: parseExpression")
         var leftExpr = prefix()
+
+        // debug
+        if !peekTokenIs(tokenType: .semicolon) {
+            print("peekToken: \(peekToken)")
+            print("precedence: \(precedence), peekPrecedence: \(peekPrecedence())")
+            print("precedence < peekPrecedence: \(precedence < peekPrecedence())")
+        }
 
         while !peekTokenIs(tokenType: .semicolon) && precedence < peekPrecedence() {
             guard let peek = peekToken, let infix = infixParseFuncs[peek.type], let left = leftExpr else {
@@ -188,12 +201,14 @@ extension Parser {
     
     private func parseIdentifier() -> Expression? {
         guard let curToken = currentToken else { return nil }
+        print("invoke: parseIdentifier")
         return Identifier(token: curToken, value: curToken.literal)
     }
     
     private func parseIntegerLiteral() -> Expression? {
         guard let curToken = currentToken else { return nil }
         let literal = Int(curToken.literal)
+        print("invoke: parseIntegerLiteral")
         switch literal {
         case .some(let lit):
             return IntegerLiteral(token: curToken, value: lit)
@@ -203,9 +218,15 @@ extension Parser {
         }
     }
     
+    private func parseBoolLiteral() -> Expression? {
+        guard let curToken = currentToken else { return nil }
+        let value = curTokenIs(tokenType: ._true)
+        return BoolLiteral(token: curToken, value: value)
+    }
+    
     private func parsePrefixExpression() -> Expression? {
         guard let prefixOperatorToken = currentToken else { return nil }
-        
+        print("invoke: parsePrefixExpression")
         nextToken()
         
         guard let right = parseExpression(precedence: .prefix) else {
@@ -218,6 +239,7 @@ extension Parser {
     
     private func parseInfixExpression(left: Expression) -> Expression? {
         guard let infixOperatorToken = currentToken else { return nil }
+        print("invoke: parseInfixExpression")
         let precedence = curPrecedence()
         nextToken()
         
