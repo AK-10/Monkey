@@ -176,6 +176,13 @@ extension Parser {
         print("invoke: parseExpression")
         var leftExpr = prefix()
 
+        // debug
+        if !peekTokenIs(tokenType: .semicolon) {
+            print("peekToken: \(peekToken)")
+            print("precedence: \(precedence), peekPrecedence: \(peekPrecedence())")
+            print("precedence < peekPrecedence: \(precedence < peekPrecedence())")
+        }
+
         while !peekTokenIs(tokenType: .semicolon) && precedence < peekPrecedence() {
             guard let peek = peekToken, let infix = infixParseFuncs[peek.type], let left = leftExpr else {
                 return leftExpr

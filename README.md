@@ -26,7 +26,7 @@
                         |
                         |-- value(int: 20)
 ```
-      
+
 - LetStatementのパース(2019/10/17)
   - let文のBNF(?)
 
@@ -59,8 +59,74 @@
 <pre opertor> <expression>
 ```
 
-- 前置オペレータのparse (2020/11/4)
+- 前置オペレータのparse (2019/11/4)
   - parsePrefixOperatorメソッドをparseExpressionに食わせるだけ
+
+- 関数のトレース (2019/11/12)
+  - (10 + 4 * 3) に対するparseStatementのトレース
+```
+Monkey >> 10 + 4 * 3;
+invoke: parseStatement
+invoke: parseExpression(rootToken = <int: 10>)
+invoke: parseIntegerLiteral(left = 10)
+
+-- parseExpression
+peekToken: Monkey.Token(type: Monkey.TokenType.plus, literal: "+")
+precedence: lowest, peekPrecedence: sum
+precedence < peekPrecedence: true <- 右結合
+--
+
+invoke: parseInfixExpression
+invoke: parseExpression
+invoke: parseIntegerLiteral(left = 4)
+
+-- parseExpression
+peekToken: Monkey.Token(type: Monkey.TokenType.asterisk, literal: "*")
+precedence: sum, peekPrecedence: product
+precedence < peekPrecedence: true <- 右結合
+--
+
+invoke: parseInfixExpression(infix: *, left = 4) curToken: * -> 3
+invoke: parseExpression() curToken: 3
+invoke: parseIntegerLiteral(3)
+invoke: parseExpressionStatement
+invoke: parseStatement
+infix operator: (Int: 10 + infix operator: (Int: 4 * Int: 4))
+
+
+Monkey >> 1 + 2 + 3;
+invoke: parseStatement
+invoke: parseExpression(rootToken = <int: 1>)
+invoke: parseIntegerLiteral
+
+-- parseExpression
+peekToken: Monkey.Token(type: Monkey.TokenType.plus, literal: "+")
+precedence: lowest, peekPrecedence: sum
+precedence < peekPrecedence: true <- 右結合
+--
+
+invoke: parseInfixExpression
+invoke: parseExpression
+invoke: parseIntegerLiteral
+
+-- parseExpression
+peekToken: Monkey.Token(type: Monkey.TokenType.plus, literal: "+")
+precedence: sum, peekPrecedence: sum
+precedence < peekPrecedence: false <- 左結合
+--
+  - `precedence < peekPrecedence()` が成り立つ場合右結合
+    - 右結合の場合，現在評価している値が右側の演算子の演算対象として評価される
+      - `... n + 2 * m ...;`の現在のトークンが`2`の時を考えると, 右結合の場合 2 * mとして扱われる(右側の演算子に吸い込まれる).
+
+
+invoke: parseInfixExpression
+invoke: parseExpression
+invoke: parseIntegerLiteral
+invoke: parseExpressionStatement
+invoke: parseStatement
+infix operator: (infix operator: (Int: 1 + Int: 2) + Int: 3)
+```
+
 
 ## swiftPM
 - `$ mkdir {projectName}`: プロジェクトディレクトリ作成
