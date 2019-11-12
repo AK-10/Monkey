@@ -72,6 +72,10 @@ class Parser {
 
         // integer
         registerPrefix(tokenType: .int, fn: parseIntegerLiteral)
+        
+        // bool
+        registerPrefix(tokenType: ._true, fn: parseBoolLiteral)
+        registerPrefix(tokenType: ._false, fn: parseBoolLiteral)
 
         // prefix operator
         registerPrefix(tokenType: .minus, fn: parsePrefixExpression)
@@ -212,6 +216,12 @@ extension Parser {
             errors.append("could not parse \(curToken.literal) as Integer")
             return nil
         }
+    }
+    
+    private func parseBoolLiteral() -> Expression? {
+        guard let curToken = currentToken else { return nil }
+        let value = curTokenIs(tokenType: ._true)
+        return BoolLiteral(token: curToken, value: value)
     }
     
     private func parsePrefixExpression() -> Expression? {
