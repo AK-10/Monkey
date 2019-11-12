@@ -114,10 +114,6 @@ peekToken: Monkey.Token(type: Monkey.TokenType.plus, literal: "+")
 precedence: sum, peekPrecedence: sum
 precedence < peekPrecedence: false <- 左結合
 --
-  - `precedence < peekPrecedence()` が成り立つ場合右結合
-    - 右結合の場合，現在評価している値が右側の演算子の演算対象として評価される
-      - `... n + 2 * m ...;`の現在のトークンが`2`の時を考えると, 右結合の場合 2 * mとして扱われる(右側の演算子に吸い込まれる).
-
 
 invoke: parseInfixExpression
 invoke: parseExpression
@@ -126,6 +122,13 @@ invoke: parseExpressionStatement
 invoke: parseStatement
 infix operator: (infix operator: (Int: 1 + Int: 2) + Int: 3)
 ```
+  - `precedence < peekPrecedence()` が成り立つ場合右結合
+    - 右結合の場合，現在評価している値が右側の演算子の演算対象として評価される
+      - `... n + 2 * m ...;`の現在のトークンが`2`の時を考えると, 右結合の場合 2 * mとして扱われる(右側の演算子に吸い込まれる).
+
+- booleanリテラル(true, false)のパース(2019/11/13)
+- 
+
 
 
 ## swiftPM
