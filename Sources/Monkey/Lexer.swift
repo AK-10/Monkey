@@ -12,26 +12,26 @@ class Lexer {
     var position: Int // 入力における現在の位置
     var readPosition: Int // これから読み込む位置（現在の次の位置）
     var ch: Character? // 現在検査中の文字
-    
+
     init(_ _input: String) {
         input = _input
         position = 0
         readPosition = position + 1
         ch = input[position]
     }
-    
+
     func readChar() {
         ch = input[readPosition]
         position = readPosition
         readPosition += 1
     }
-    
+
     func nextToken() -> Token? {
         var token: Token? = nil
-        
+
         // 空行は特に意味を持たないのでスキップ
         skipWhiteSpace()
-        
+
         switch ch {
         case .some(let char):
             let literal = String(char)
@@ -42,6 +42,7 @@ class Lexer {
                 case .some(let nextChar):
                     if nextChar == Character("=") {
                         token = Token(.eq, String([char, nextChar]))
+                        readChar()
                     } else {
                         token = Token(.assign, literal)
                     }
@@ -78,6 +79,7 @@ class Lexer {
                 case .some(let nextChar):
                     if nextChar == Character("=") {
                         token = Token(.notEq, String([char, nextChar]))
+                        readChar()
                     } else {
                         token = Token(.bang, literal)
                     }
