@@ -54,7 +54,8 @@
 ```bnf
 <expression> <in operator> <expression>
 ```
-    - prefix
+
+- prefix
 
 ```bnf
 <pre opertor> <expression>
@@ -128,7 +129,9 @@ infix operator: (infix operator: (Int: 1 + Int: 2) + Int: 3)
       - `... n + 2 * m ...;`の現在のトークンが`2`の時を考えると, 右結合の場合 2 * mとして扱われる(右側の演算子に吸い込まれる).
 
 - booleanリテラル(true, false)のパース(2019/11/13)
-- 
+- `()`のパース(2019/11/13)
+  - `(<expression>)` なので `(`が現在のトークンになったタイミングでトークンを次に進めて`parseExpression`呼び出し
+  - 最後が`)`じゃなかったらエラー( 今は参考書に倣って`nil`を返している)
 
 
 
