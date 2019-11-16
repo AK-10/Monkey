@@ -157,6 +157,21 @@ if (x > y) {
   - if式は最後に評価された値を返す.
     - return はなくても良い
 
+- 関数リテラルのパース(2019/11/17)
+  - 関数リテラルのbnf
+    
+```
+fn <parameters> <block statement>    
+<parameters> := (<parameter one>, <parameter two>, ...)
+```
+  -関数リテラルの例
+```
+fn() {
+  return foobar + barfoo;
+}
+```
+
+
 ## swiftPM
 - `$ mkdir {projectName}`: プロジェクトディレクトリ作成
 - `$ swift package init --type executable`: swiftPMで初期化, executable指定でmainが作成される
