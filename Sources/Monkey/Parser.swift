@@ -80,6 +80,10 @@ class Parser {
         registerPrefix(tokenType: ._true, fn: parseBoolLiteral)
         registerPrefix(tokenType: ._false, fn: parseBoolLiteral)
 
+        
+        // if
+        registerPrefix(tokenType: ._if, fn: parseIfExpression)
+        
         // prefix operator
         registerPrefix(tokenType: .minus, fn: parsePrefixExpression)
         registerPrefix(tokenType: .bang, fn: parsePrefixExpression)
@@ -167,6 +171,7 @@ extension Parser {
         print("invoke: parseExpressionStatement")
         // セミコロンの一つ前まで進む
         while !peekTokenIs(tokenType: .semicolon) {
+            print(currentToken.debugDescription)
             nextToken()
         }
 
@@ -275,10 +280,19 @@ extension Parser {
             return nil
         }
 
-        // 仮
-        let conditionBlock = BlockStatement(token: Token(.lBrace, "{"), statements: [])
+        guard let conditionBlock = parseBlockStatement() else { return nil }
 
-        return IfExpression(token: ifToken, condition: condition, consequence: conditionBlock, alternative: nil)
+        var alternativeBlock: BlockStatement?
+
+        if peekTokenIs(tokenType: ._else) {
+            nextToken()
+            if !expectPeek(tokenType: .lBrace) {
+                return nil
+            }
+            alternativeBlock = parseBlockStatement()
+        }
+
+        return IfExpression(token: ifToken, condition: condition, consequence: conditionBlock, alternative: alternativeBlock)
      }
 
      // currentTokenが.lBraceの時に呼ばれる
@@ -289,7 +303,7 @@ extension Parser {
 
         nextToken()
 
-        while !curTokenIs(tokenType: .rBrace) && curTokenIs(tokenType: .eof) {
+        while !curTokenIs(tokenType: .rBrace) && !curTokenIs(tokenType: .eof) {
             let stmt = parseStatement()
             if let stmt = stmt {
                 statements.append(stmt)
