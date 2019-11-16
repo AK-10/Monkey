@@ -257,29 +257,48 @@ extension Parser {
 
         return InfixExpression(token: infixOperatorToken, op: infixOperatorToken.literal, left: left, right: right)
     }
-    
+
     private func parseIfExpression() -> Expression? {
         guard let ifToken = currentToken else { return nil }
         if !expectPeek(tokenType: .lParen) { // ifの後はlParenのはずなので,そうでなければエラー(nilを返す)
             return nil
         }
-        
+
         nextToken() // currentTokenは`lParen`になる
-        
+
         guard let condition = parseExpression(precedence: .lowest) else { return nil } // (<condition>)をparseできなければnil
         if !expectPeek(tokenType: .rParen) {
             return nil
         }
-        
+
         if !expectPeek(tokenType: .lBrace) {  // conditionの後はlBlaceのはずなので，そうでなければエラー(nilを返す)
             return nil
         }
-        
+
         // 仮
         let conditionBlock = BlockStatement(token: Token(.lBrace, "{"), statements: [])
-        
+
         return IfExpression(token: ifToken, condition: condition, consequence: conditionBlock, alternative: nil)
      }
+
+     // currentTokenが.lBraceの時に呼ばれる
+    private func parseBlockStatement() -> BlockStatement? {
+        guard let lBraceToken = currentToken else { return nil }
+
+        var statements: [Statement] = []
+
+        nextToken()
+
+        while !curTokenIs(tokenType: .rBrace) && curTokenIs(tokenType: .eof) {
+            let stmt = parseStatement()
+            if let stmt = stmt {
+                statements.append(stmt)
+            }
+            nextToken()
+        }
+
+        return BlockStatement(token: lBraceToken, statements: statements)
+    }
 }
 
 // util系
