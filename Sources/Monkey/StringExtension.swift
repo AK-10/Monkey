@@ -8,6 +8,7 @@
 import Foundation
 
 extension String {
+    
     subscript (i: Int) -> Character? {
         return i < self.count ? self[index(startIndex, offsetBy: i)] : nil
     }

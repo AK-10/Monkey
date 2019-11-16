@@ -80,6 +80,10 @@ class Parser {
         registerPrefix(tokenType: ._true, fn: parseBoolLiteral)
         registerPrefix(tokenType: ._false, fn: parseBoolLiteral)
 
+        
+        // if
+        registerPrefix(tokenType: ._if, fn: parseIfExpression)
+        
         // prefix operator
         registerPrefix(tokenType: .minus, fn: parsePrefixExpression)
         registerPrefix(tokenType: .bang, fn: parsePrefixExpression)
@@ -167,6 +171,7 @@ extension Parser {
         print("invoke: parseExpressionStatement")
         // セミコロンの一つ前まで進む
         while !peekTokenIs(tokenType: .semicolon) {
+            print(currentToken.debugDescription)
             nextToken()
         }
 
@@ -174,18 +179,18 @@ extension Parser {
     }
 
     private func parseExpression(precedence: EvalPriority) -> Expression? {
-        guard let curToken = currentToken else { return nil }
-        guard let prefix = prefixParseFuncs[curToken.type] else {
+        guard let expToken = currentToken else { return nil }
+        guard let prefix = prefixParseFuncs[expToken.type] else {
             // append error
-            noPrefixParseFuncError(tokenType: curToken.type)
+            noPrefixParseFuncError(tokenType: expToken.type)
             return nil
         }
         print("invoke: parseExpression")
         var leftExpr = prefix()
 
-        // debug
+        // debug print
         if !peekTokenIs(tokenType: .semicolon) {
-            print("peekToken: \(peekToken)")
+            print("peekToken: \(peekToken.debugDescription)")
             print("precedence: \(precedence), peekPrecedence: \(peekPrecedence())")
             print("precedence < peekPrecedence: \(precedence < peekPrecedence())")
         }
@@ -203,28 +208,28 @@ extension Parser {
     }
 
     private func parseIdentifier() -> Expression? {
-        guard let curToken = currentToken else { return nil }
+        guard let identToken = currentToken else { return nil }
         print("invoke: parseIdentifier")
-        return Identifier(token: curToken, value: curToken.literal)
+        return Identifier(token: identToken, value: identToken.literal)
     }
 
     private func parseIntegerLiteral() -> Expression? {
-        guard let curToken = currentToken else { return nil }
-        let literal = Int(curToken.literal)
+        guard let intToken = currentToken else { return nil }
+        let literal = Int(intToken.literal)
         print("invoke: parseIntegerLiteral")
         switch literal {
         case .some(let lit):
-            return IntegerLiteral(token: curToken, value: lit)
+            return IntegerLiteral(token: intToken, value: lit)
         case .none:
-            errors.append("could not parse \(curToken.literal) as Integer")
+            errors.append("could not parse \(intToken.literal) as Integer")
             return nil
         }
     }
 
     private func parseBoolLiteral() -> Expression? {
-        guard let curToken = currentToken else { return nil }
+        guard let boolToken = currentToken else { return nil }
         let value = curTokenIs(tokenType: ._true)
-        return BoolLiteral(token: curToken, value: value)
+        return BoolLiteral(token: boolToken, value: value)
     }
 
     private func parseGroupedExpression() -> Expression? {
@@ -256,7 +261,57 @@ extension Parser {
         guard let right = parseExpression(precedence: precedence) else { return nil }
 
         return InfixExpression(token: infixOperatorToken, op: infixOperatorToken.literal, left: left, right: right)
+    }
 
+    private func parseIfExpression() -> Expression? {
+        guard let ifToken = currentToken else { return nil }
+        if !expectPeek(tokenType: .lParen) { // ifの後はlParenのはずなので,そうでなければエラー(nilを返す)
+            return nil
+        }
+
+        nextToken() // currentTokenは`lParen`になる
+
+        guard let condition = parseExpression(precedence: .lowest) else { return nil } // (<condition>)をparseできなければnil
+        if !expectPeek(tokenType: .rParen) {
+            return nil
+        }
+
+        if !expectPeek(tokenType: .lBrace) {  // conditionの後はlBlaceのはずなので，そうでなければエラー(nilを返す)
+            return nil
+        }
+
+        guard let conditionBlock = parseBlockStatement() else { return nil }
+
+        var alternativeBlock: BlockStatement?
+
+        if peekTokenIs(tokenType: ._else) {
+            nextToken()
+            if !expectPeek(tokenType: .lBrace) {
+                return nil
+            }
+            alternativeBlock = parseBlockStatement()
+        }
+
+        return IfExpression(token: ifToken, condition: condition, consequence: conditionBlock, alternative: alternativeBlock)
+     }
+
+     // currentTokenが.lBraceの時に呼ばれる
+    private func parseBlockStatement() -> BlockStatement? {
+        guard let lBraceToken = currentToken else { return nil }
+
+        var statements: [Statement] = []
+
+        nextToken()
+
+        while !curTokenIs(tokenType: .rBrace) && !curTokenIs(tokenType: .eof) {
+            let stmt = parseStatement()
+            if let stmt = stmt {
+                statements.append(stmt)
+            }
+            nextToken()
+        }
+
+        return BlockStatement(token: lBraceToken, statements: statements)
     }
 }
 

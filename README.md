@@ -54,7 +54,8 @@
 ```bnf
 <expression> <in operator> <expression>
 ```
-    - prefix
+
+- prefix
 
 ```bnf
 <pre opertor> <expression>
@@ -128,9 +129,33 @@ infix operator: (infix operator: (Int: 1 + Int: 2) + Int: 3)
       - `... n + 2 * m ...;`の現在のトークンが`2`の時を考えると, 右結合の場合 2 * mとして扱われる(右側の演算子に吸い込まれる).
 
 - booleanリテラル(true, false)のパース(2019/11/13)
-- 
+- `()`のパース(2019/11/13)
+  - `(<expression>)` なので `(`が現在のトークンになったタイミングでトークンを次に進めて`parseExpression`呼び出し
+  - 最後が`)`じゃなかったらエラー( 今は参考書に倣って`nil`を返している)
 
+- if式のパース (2019/11/15)
+  - bnfは以下のようになる
+  
+```bnf
+if (condition) <consequence> else <alternative>
+```
+  - if式の例
+  
+```
+if (x > y) {
+  return x;
+} else {
+  return y;
+}
 
+# elseは省略できる
+if (x > y) {
+  return x;
+}
+
+```
+  - if式は最後に評価された値を返す.
+    - return はなくても良い
 
 ## swiftPM
 - `$ mkdir {projectName}`: プロジェクトディレクトリ作成
