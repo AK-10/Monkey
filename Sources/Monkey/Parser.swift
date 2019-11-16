@@ -80,9 +80,11 @@ class Parser {
         registerPrefix(tokenType: ._true, fn: parseBoolLiteral)
         registerPrefix(tokenType: ._false, fn: parseBoolLiteral)
 
-        
         // if
         registerPrefix(tokenType: ._if, fn: parseIfExpression)
+
+        // function
+        registerPrefix(tokenType: .function, fn: parseFunctionLiteral)
         
         // prefix operator
         registerPrefix(tokenType: .minus, fn: parsePrefixExpression)
@@ -312,6 +314,46 @@ extension Parser {
         }
 
         return BlockStatement(token: lBraceToken, statements: statements)
+    }
+    
+    private func parseFunctionLiteral() -> Expression? {
+        guard let functionToken = currentToken else { return nil }
+        guard expectPeek(tokenType: .lParen) else { return nil }
+        
+        let parameters = parseFunctionParameters()
+        
+        guard expectPeek(tokenType: .lBrace) else { return nil }
+        
+        guard let body = parseBlockStatement() else { return nil }
+        
+        return FunctionLiteral(token: functionToken, parameters: parameters, body: body)
+    }
+    
+    private func parseFunctionParameters() -> [Identifier] { // currentTokenはlParenまたはidentifier
+        var ids: [Identifier] = []
+        if peekTokenIs(tokenType: .rParen) { // 次のトークンがrParenだったらパラメータがない
+            nextToken()
+            return []
+        }
+        
+        nextToken()
+        
+        guard let idToken = currentToken else { return [] }
+        ids.append(Identifier(token: idToken, value: idToken.literal))
+
+
+        while peekTokenIs(tokenType: .comma) { // (p1, p2, ...) `,`の前がparameterなのでこの条件式
+            // 二回tokenを進めるとidTokenになるはず
+            nextToken()
+            nextToken()
+            
+            guard let idToken = currentToken else { return [] }
+            ids.append(Identifier(token: idToken, value: idToken.literal))
+        }
+        
+        guard expectPeek(tokenType: .rParen) else { return [] }
+        
+        return ids
     }
 }
 

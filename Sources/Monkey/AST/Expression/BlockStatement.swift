@@ -11,15 +11,15 @@ struct BlockStatement: Expression {
 
     let token: Token
     let statements: [Statement]
-    
+
     var description: String {
-        let values = ["{"] ++ statements.map{ $0.description } ++ ["}"]
+        let values = ["{"] + statements.map{ $0.description } + ["}"]
         return values.reduce("") { $0 + $1 + "\n" }
     }
-    
+
     func expressionNode() {
     }
-    
+
     func tokenLiteral() -> String {
         return token.literal
     }
