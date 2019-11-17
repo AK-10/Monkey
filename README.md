@@ -172,6 +172,24 @@ fn() {
 ```
 
 
+- 関数呼び出し式のパース(2019/11/17)
+  - 呼び出し式のbnf
+  
+```
+<expression>(<comma separated expressions>)
+```
+
+  - 呼び出し式の例
+
+```
+add(2,3)
+
+fn(x, y){ x + y; }(1, 3)
+
+callsFunction(2, 3, fn(x, y){ x + y; })
+```
+
+
 ## swiftPM
 - `$ mkdir {projectName}`: プロジェクトディレクトリ作成
 - `$ swift package init --type executable`: swiftPMで初期化, executable指定でmainが作成される
@@ -195,3 +213,6 @@ expression
 enum Expression {
   case
 ```
+
+- semantic code は Resultで包むべきだった
+- Result<Expression, Error<[String]>>であれば,エラーメッセージの処理もしやすく，パターンマッチでうまくできる

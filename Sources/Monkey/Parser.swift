@@ -34,6 +34,8 @@ enum EvalPriority: Int, Comparable, Equatable {
             return .sum
         case .slash, .asterisk:
             return .product
+        case .lParen:
+            return .call
         default:
             return .lowest
         }
@@ -99,6 +101,11 @@ class Parser {
         registerInfix(tokenType: .notEq, fn: parseInfixExpression)
         registerInfix(tokenType: .lt, fn: parseInfixExpression)
         registerInfix(tokenType: .gt, fn: parseInfixExpression)
+        
+        // call function
+        // add(1, 3) を `add` `(` `1, 3` `)` と見ることができる
+        // `(` を中置演算子, `)`を末尾のデリミタとして扱うとinfixOperatorとして扱える
+        registerInfix(tokenType: .lParen, fn: parseCallExpression)
     }
 
     func parseProgram() -> Program {
@@ -354,6 +361,46 @@ extension Parser {
         guard expectPeek(tokenType: .rParen) else { return [] }
         
         return ids
+    }
+    
+    // identifierをtokenとして取得したのち，次のトークンとして`(`が得られた時に呼ばれる
+    private func parseCallExpression(function: Expression) -> Expression? {
+        guard let lParenToken = currentToken else { return nil }
+        guard let arguments = parseCallArguments() else { return nil }
+        
+        return CallExpression(token: lParenToken, function: function, arguments: arguments)
+    }
+    
+    // parseCallExpressionから呼ばれる
+    private func parseCallArguments() -> [Expression]? {
+        var arguments = [Expression]()
+        
+        if peekTokenIs(tokenType: .rParen) {
+            nextToken()
+            return arguments
+        }
+        
+        nextToken()
+        
+        guard let exp = parseExpression(precedence: .lowest) else {
+            return nil  // TODO: 別の対処をすべき
+        }
+        arguments.append(exp)
+        
+        while peekTokenIs(tokenType: .comma) {
+            nextToken()
+            nextToken()
+            guard let expr = parseExpression(precedence: .lowest) else {
+                return nil // TODO: 別の対処をすべき
+            }
+            arguments.append(expr)
+        }
+        
+        guard expectPeek(tokenType: .rParen) else {
+            return nil
+        }
+        
+        return arguments
     }
 }
 
