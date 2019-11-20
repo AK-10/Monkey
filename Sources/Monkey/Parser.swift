@@ -10,9 +10,9 @@ import Foundation
 typealias PrefixParseFunc = () -> Expression?
 typealias InfixParseFunc = (Expression) -> Expression?
 
-enum EvalPriority: Int, Comparable, Equatable {
+enum EvalPrecedence: Int, Comparable, Equatable {
 
-    static func < (lhs: EvalPriority, rhs: EvalPriority) -> Bool {
+    static func < (lhs: EvalPrecedence, rhs: EvalPrecedence) -> Bool {
         return lhs.rawValue < rhs.rawValue
     }
 
@@ -24,7 +24,7 @@ enum EvalPriority: Int, Comparable, Equatable {
     case prefix // -(value) or !(value)
     case call // myFunction(x)
 
-    static func infixOperatorPriority(tokenType: TokenType) -> EvalPriority {
+    static func infixOperatorPriority(tokenType: TokenType) -> EvalPrecedence {
         switch tokenType {
         case .eq, .notEq:
             return .equals
@@ -187,7 +187,7 @@ extension Parser {
         return ExpressionStatement(token: rootToken, expr: expr)
     }
 
-    private func parseExpression(precedence: EvalPriority) -> Expression? {
+    private func parseExpression(precedence: EvalPrecedence) -> Expression? {
         guard let expToken = currentToken else { return nil }
         guard let prefix = prefixParseFuncs[expToken.type] else {
             // append error
@@ -449,19 +449,19 @@ extension Parser {
         errors.append(msg)
     }
 
-    private func peekPrecedence() -> EvalPriority {
+    private func peekPrecedence() -> EvalPrecedence {
         guard let peek = peekToken else {
 //            fatalError("Parser: peekToken is nil")
             return .lowest
         }
-        return EvalPriority.infixOperatorPriority(tokenType: peek.type)
+        return EvalPrecedence.infixOperatorPriority(tokenType: peek.type)
     }
 
-    private func curPrecedence() -> EvalPriority {
+    private func curPrecedence() -> EvalPrecedence {
         guard let current = currentToken else {
 //            fatalError("Parser: currentToken is nil")
             return .lowest
         }
-        return EvalPriority.infixOperatorPriority(tokenType: current.type)
+        return EvalPrecedence.infixOperatorPriority(tokenType: current.type)
     }
 }
