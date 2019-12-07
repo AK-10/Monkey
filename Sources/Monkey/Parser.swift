@@ -125,7 +125,6 @@ class Parser {
 extension Parser {
     private func parseStatement() -> Statement? {
         guard let curToken = currentToken else { return nil }
-        print("invoke: parseStatement")
         switch curToken.type {
         case ._let:
             return parseLetStatement()
@@ -139,7 +138,6 @@ extension Parser {
     private func parseLetStatement() -> LetStatement? {
         // rootToken: これはletのはず
         guard let rootToken = currentToken else { return nil }
-        print("invoke: parseLetStatement")
         if !expectPeek(tokenType: .ident) {
             return nil
         }
@@ -150,12 +148,14 @@ extension Parser {
             if !expectPeek(tokenType: .assign) {
                 return nil
             }
-            // TODO: セミコロンに遭遇するまで式を読み飛ばしている
-            while !curTokenIs(tokenType: .semicolon) {
+            
+            guard let value = parseExpression(precedence: .lowest) else { return nil }
+            
+            if peekTokenIs(tokenType: .semicolon) {
                 nextToken()
             }
             // TODO: valueに正しい値を入れる（現状dummyを入れている）
-            return LetStatement(token: rootToken, name: name, value: DummyExpression())
+            return LetStatement(token: rootToken, name: name, value: value)
         case .none:
             return nil
         }
@@ -166,18 +166,14 @@ extension Parser {
 
         nextToken()
 
-        // TODO: セミコロンに遭遇するまで式を読み飛ばしている
-        while !curTokenIs(tokenType: .semicolon) {
-            nextToken()
-        }
-
-        return ReturnStatement(token: rootToken, returnValue: DummyExpression())
+        guard let value = parseExpression(precedence: .lowest) else { return nil }
+        
+        return ReturnStatement(token: rootToken, returnValue: value)
     }
 
     private func parseExpressionStatement() -> ExpressionStatement? {
         guard let rootToken = currentToken else { return nil }
         guard let expr = parseExpression(precedence: .lowest) else { return nil }
-        print("invoke: parseExpressionStatement")
         // セミコロンの一つ前まで進む
         while !peekTokenIs(tokenType: .semicolon) {
             print(currentToken.debugDescription)
@@ -194,15 +190,7 @@ extension Parser {
             noPrefixParseFuncError(tokenType: expToken.type)
             return nil
         }
-        print("invoke: parseExpression")
         var leftExpr = prefix()
-
-        // debug print
-        if !peekTokenIs(tokenType: .semicolon) {
-            print("peekToken: \(peekToken.debugDescription)")
-            print("precedence: \(precedence), peekPrecedence: \(peekPrecedence())")
-            print("precedence < peekPrecedence: \(precedence < peekPrecedence())")
-        }
 
         while !peekTokenIs(tokenType: .semicolon) && precedence < peekPrecedence() {
             guard let peek = peekToken, let infix = infixParseFuncs[peek.type], let left = leftExpr else {
@@ -218,14 +206,12 @@ extension Parser {
 
     private func parseIdentifier() -> Expression? {
         guard let identToken = currentToken else { return nil }
-        print("invoke: parseIdentifier")
         return Identifier(token: identToken, value: identToken.literal)
     }
 
     private func parseIntegerLiteral() -> Expression? {
         guard let intToken = currentToken else { return nil }
         let literal = Int(intToken.literal)
-        print("invoke: parseIntegerLiteral")
         switch literal {
         case .some(let lit):
             return IntegerLiteral(token: intToken, value: lit)
@@ -250,7 +236,6 @@ extension Parser {
 
     private func parsePrefixExpression() -> Expression? {
         guard let prefixOperatorToken = currentToken else { return nil }
-        print("invoke: parsePrefixExpression")
         nextToken()
 
         guard let right = parseExpression(precedence: .prefix) else {
@@ -263,7 +248,6 @@ extension Parser {
 
     private func parseInfixExpression(left: Expression) -> Expression? {
         guard let infixOperatorToken = currentToken else { return nil }
-        print("invoke: parseInfixExpression")
         let precedence = curPrecedence()
         nextToken()
 
