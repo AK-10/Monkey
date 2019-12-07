@@ -189,6 +189,8 @@ fn(x, y){ x + y; }(1, 3)
 callsFunction(2, 3, fn(x, y){ x + y; })
 ```
 
+- todoの削除(2019/12/8)
+  - letのパースとreturnのパースで値をdummyにしていたものをparseExpressionで得られた値に変更
 
 ## swiftPM
 - `$ mkdir {projectName}`: プロジェクトディレクトリ作成
@@ -216,3 +218,4 @@ enum Expression {
 
 - semantic code は Resultで包むべきだった
 - Result<Expression, Error<[String]>>であれば,エラーメッセージの処理もしやすく，パターンマッチでうまくできる
+
