@@ -145,16 +145,19 @@ extension Parser {
         switch currentToken {
         case .some(let curToken):
             let name = Identifier(token: curToken, value: curToken.literal)
+
             if !expectPeek(tokenType: .assign) {
                 return nil
             }
+
+            nextToken()
             
             guard let value = parseExpression(precedence: .lowest) else { return nil }
             
             if peekTokenIs(tokenType: .semicolon) {
                 nextToken()
             }
-            // TODO: valueに正しい値を入れる（現状dummyを入れている）
+
             return LetStatement(token: rootToken, name: name, value: value)
         case .none:
             return nil
@@ -174,9 +177,9 @@ extension Parser {
     private func parseExpressionStatement() -> ExpressionStatement? {
         guard let rootToken = currentToken else { return nil }
         guard let expr = parseExpression(precedence: .lowest) else { return nil }
-        // セミコロンの一つ前まで進む
-        while !peekTokenIs(tokenType: .semicolon) {
-            print(currentToken.debugDescription)
+        
+        // 式のparse後次のトークンはsemicolonのはず．これを次に進めることで次のstatementをparseする．
+        if peekTokenIs(tokenType: .semicolon) {
             nextToken()
         }
 
@@ -396,7 +399,7 @@ extension Parser {
     }
 
     private func peekError(tokenType: TokenType) {
-        let msg = "expected next token to be \(tokenType.rawValue), got \(peekToken?.type.rawValue ?? "") instead"
+        let msg = "expected next token to be \(tokenType.rawValue), got \(peekToken?.type.rawValue ?? "invalid type") instead"
         errors.append(msg)
     }
 
@@ -405,6 +408,7 @@ extension Parser {
             nextToken()
             return true
         }
+        peekError(tokenType: tokenType)
         return false
     }
 
