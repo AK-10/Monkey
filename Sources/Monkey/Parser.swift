@@ -171,6 +171,11 @@ extension Parser {
 
         guard let value = parseExpression(precedence: .lowest) else { return nil }
         
+        // 式のparse後次のトークンはsemicolonのはず．これを次に進めることで次のstatementをparseする．
+        if peekTokenIs(tokenType: .semicolon) {
+            nextToken()
+        }
+        
         return ReturnStatement(token: rootToken, returnValue: value)
     }
 
