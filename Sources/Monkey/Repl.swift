@@ -16,8 +16,20 @@ struct Repl {
                 let lexer = Lexer(input)
                 let parser = Parser(lexer)
                 let program = parser.parseProgram()
+                if parser.errors.count > 0 {
+                    print("error detected:")
+                    printParserErrors(errors: parser.errors)
+                    continue
+                }
+                print("parse succeeded:")
                 print(program.description)
             }
+        }
+    }
+    
+    private func printParserErrors(errors: [String]) {
+        for err in errors {
+            print("message: \(err)")
         }
     }
 }

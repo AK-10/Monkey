@@ -14,7 +14,7 @@ struct InfixExpression: Expression {
     let right: Expression
 
     var description: String {
-        return "infix operator: (\(left.description) \(op) \(right.description))"
+        return "infix: (\(left.description) \(op) \(right.description))"
     }
 
     func expressionNode() {
