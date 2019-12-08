@@ -164,7 +164,7 @@ if (x > y) {
 fn <parameters> <block statement>    
 <parameters> := (<parameter one>, <parameter two>, ...)
 ```
-  -関数リテラルの例
+- 関数リテラルの例
 ```
 fn() {
   return foobar + barfoo;
