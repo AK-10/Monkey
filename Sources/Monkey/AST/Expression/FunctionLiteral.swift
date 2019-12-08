@@ -14,7 +14,7 @@ struct FunctionLiteral: Expression {
 
     var description: String {
         let params = parameters.map { $0.description }
-        return ([token.literal] + params).reduce("") { $0 + $1 + "\n" }
+        return ([token.literal] + params).reduce("") { $0 + $1 + "\n" } + body.description
     }
     
     func expressionNode() {
