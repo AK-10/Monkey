@@ -7,10 +7,11 @@
 
 import Foundation
 
-enum ObjectType {
+enum ObjectType: String {
+    case integer = "Integer"
 }
 
 protocol Object {
-    func type()
-    func inspect()
+    func type() -> ObjectType
+    func inspect() -> String
 }
