@@ -10,6 +10,7 @@ import Foundation
 enum ObjectType: String {
     case integer = "INTEGER"
     case boolean = "BOOLEAN"
+    case null = "NULL"
 }
 
 protocol Object {
