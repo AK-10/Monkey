@@ -9,6 +9,10 @@ import Foundation
 
 
 class Evaluator {
+    // true, falseは新しいオブジェクトを作る必要がない
+    final let trueObject = Boolean(value: true)
+    final let falseObject = Boolean(value: false)
+    
     func eval(node: Node) -> Object? {
         switch node {
         // 式
@@ -17,7 +21,7 @@ class Evaluator {
             return Integer(value: literal.value)
         case is BoolLiteral:
             guard let literal = node as? BoolLiteral else { return nil }
-            return Boolean(value: literal.value)
+            return literal.value ? trueObject : falseObject
         // 文
         case is Program:
             guard let nd = node as? Program else { return nil }
