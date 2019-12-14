@@ -7,6 +7,7 @@
 
 import Foundation
 
+
 class Evaluator {
     func eval(node: Node) -> Object? {
         switch node {
@@ -14,7 +15,9 @@ class Evaluator {
         case is IntegerLiteral:
             guard let literal = node as? IntegerLiteral else { return nil }
             return Integer(value: literal.value)
-
+        case is BoolLiteral:
+            guard let literal = node as? BoolLiteral else { return nil }
+            return Boolean(value: literal.value)
         // 文
         case is Program:
             guard let nd = node as? Program else { return nil }
