@@ -21,13 +21,8 @@ struct Repl {
                     printParserErrors(errors: parser.errors)
                     continue
                 }
-                let evaluated = Evaluator().eval(node: program)
-                switch evaluated {
-                case .some(let ev):
-                    print(ev.inspect())
-                case .none:
-                    print("evaluate failed")
-                }
+                print("parse succeeded:")
+                print(program.description)
             }
         }
     }
