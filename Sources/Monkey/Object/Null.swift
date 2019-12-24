@@ -15,6 +15,4 @@ struct Null: Object {
     func inspect() -> String {
         return "null"
     }
-    
-    
 }
