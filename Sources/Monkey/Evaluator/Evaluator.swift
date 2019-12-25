@@ -48,23 +48,31 @@ class Evaluator {
         switch op.token.type {
         case .bang:
             return evalBangOperatorExpression(right: right)
+        case .minus:
+            return evalMinusPrefixOpratorExpression(right: right)
         default:
-            return nil
+            return nullObject
         }
     }
 
-    func evalBangOperatorExpression(right: Object) -> Object? {
+    private func evalBangOperatorExpression(right: Object) -> Object {
         // 評価方針
         // boolの場合valueの反転したObjectを返す
         // それ以外はeither null or not で考え,null -> false, otherwise -> trueの反転を返す
         switch right.type() {
         case .boolean:
-            guard let _right = right as? Boolean else { return nil }
+            guard let _right = right as? Boolean else { return nullObject }
             return _right.value ? falseObject : trueObject
         case .null:
             return trueObject
         default:
             return falseObject
         }
+    }
+    
+    private func evalMinusPrefixOpratorExpression(right: Object) -> Object {
+        guard right.type() == .integer else { return nullObject }
+        guard let integer = right as? Integer else { return nullObject }
+        return Integer(value: -integer.value)
     }
 }
