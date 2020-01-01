@@ -33,4 +33,24 @@ struct Integer: Object {
     static func /(lhs: Self, rhs: Self) -> Self {
         return Integer(value: lhs.value / rhs.value)
     }
+
+    static func ==(lhs: Self, rhs: Self) -> Boolean {
+        return Boolean(value: lhs.value == rhs.value)
+    }
+
+    static func !=(lhs: Self, rhs: Self) -> Boolean {
+        return Boolean(value: lhs.value != rhs.value)
+    }
+
+    static func >(lhs: Self, rhs: Self) -> Boolean {
+        return Boolean(value: lhs.value > rhs.value)
+    }
+
+    static func <(lhs: Self, rhs: Self) -> Boolean {
+        return Boolean(value: lhs.value < rhs.value)
+    }
+    
+    static func <=(lhs: Self, rhs: Self) -> Boolean {
+        return Boolean(value: lhs.value <= rhs.value)
+    }
 }

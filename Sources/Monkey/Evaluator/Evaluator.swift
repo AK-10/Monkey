@@ -60,10 +60,13 @@ class Evaluator {
 
     func evalInfixOperator(op: InfixExpression, _ left: Object, _ right: Object) -> Object? {
         switch (left.type(), right.type()) {
+            
         case (.integer, .integer):
-            return evalIntegerInfixExpression(op: op, left, right)
+            guard let leftInteger = left as? Integer, let rightInteger = right as? Integer else { return nullObject }
+            return evalIntegerInfixExpression(op: op, leftInteger, rightInteger)
         case (.boolean, .boolean):
-            return evalBooleanInfixExpression(op: op, left, right)
+            guard let leftBoolean = left as? Boolean, let rightBoolean = right as? Boolean else { return nullObject }
+            return evalBooleanInfixExpression(op: op, leftBoolean, rightBoolean)
         default:
             return nullObject
         }
@@ -90,35 +93,35 @@ class Evaluator {
         return Integer(value: -integer.value)
     }
 
-    private func evalIntegerInfixExpression(op: InfixExpression, _ left: Object, _ right: Object) -> Object {
-        guard let leftIntObject = left as? Integer else { return nullObject }
-        guard let rightIntObject = right as? Integer else { return nullObject }
+    private func evalIntegerInfixExpression(op: InfixExpression, _ left: Integer, _ right: Integer) -> Object {
         switch op.token.type {
         case .plus:
-            return leftIntObject + rightIntObject
+            return left + right
         case .minus:
-            return leftIntObject - rightIntObject
+            return left - right
         case .asterisk:
-            return leftIntObject * rightIntObject
+            return left * right
         case .slash:
-            return leftIntObject / rightIntObject
+            return left / right
+        case .eq:
+            return left == right
+        case .notEq:
+            return left != right
+        case .gt:
+            return left > right
+        case .lt:
+            return left < right
         default:
             return nullObject
         }
     }
 
-    private func evalBooleanInfixExpression(op: InfixExpression, _ left: Object, _ right: Object) -> Object {
-        guard let leftIntObject = left as? Integer else { return nullObject }
-        guard let rightIntObject = right as? Integer else { return nullObject }
+    private func evalBooleanInfixExpression(op: InfixExpression, _ left: Boolean, _ right: Boolean) -> Object {
         switch op.token.type {
-        case .plus:
-            return leftIntObject + rightIntObject
-        case .minus:
-            return leftIntObject - rightIntObject
-        case .asterisk:
-            return leftIntObject * rightIntObject
-        case .slash:
-            return leftIntObject / rightIntObject
+        case .eq:
+            return left == right
+        case .notEq:
+            return left != right
         default:
             return nullObject
         }
