@@ -17,4 +17,12 @@ struct Boolean: Object {
     func inspect() -> String {
         return value.description
     }
+    
+    static func ==(lhs: Self, rhs: Self) -> Self {
+        return Boolean(value: lhs.value == rhs.value)
+    }
+    
+    static func !=(lhs: Self, rhs: Self) -> Self {
+        return Boolean(value: lhs.value != rhs.value)
+    }
 }

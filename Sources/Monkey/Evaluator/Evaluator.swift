@@ -24,14 +24,17 @@ class Evaluator {
             guard let literal = node as? BoolLiteral else { return nil }
             return literal.value ? trueObject : falseObject
         // 文
-        case is Program:
-            guard let nd = node as? Program else { return nil }
+        case let nd as Program:
             return evalStatements(stmts: nd.statements)
-        case is ExpressionStatement:
-            guard let nd = node as? ExpressionStatement else { return nil }
+        case let nd as ExpressionStatement:
             return eval(node: nd.expr)
-        case is PrefixExpression:
-            guard let prefixOp = node as? PrefixExpression else { return nil }
+        case let prefixOp as PrefixExpression:
+            guard let right = eval(node: prefixOp.right) else { return nil }
+            return evalPrefixOperator(op: prefixOp, right: right)
+        case let infixOp as InfixExpression:
+            guard let left = eval(node: infixOp.left), let right = eval(node: infixOp.right) else { return nil }
+            return evalInfixOperator(op: infixOp, left, right)
+        case let prefixOp as PrefixExpression:
             guard let right = eval(node: prefixOp.right) else { return nil }
             return evalPrefixOperator(op: prefixOp, right: right)
         default:
@@ -55,6 +58,20 @@ class Evaluator {
         }
     }
 
+    func evalInfixOperator(op: InfixExpression, _ left: Object, _ right: Object) -> Object? {
+        switch (left.type(), right.type()) {
+            
+        case (.integer, .integer):
+            guard let leftInteger = left as? Integer, let rightInteger = right as? Integer else { return nullObject }
+            return evalIntegerInfixExpression(op: op, leftInteger, rightInteger)
+        case (.boolean, .boolean):
+            guard let leftBoolean = left as? Boolean, let rightBoolean = right as? Boolean else { return nullObject }
+            return evalBooleanInfixExpression(op: op, leftBoolean, rightBoolean)
+        default:
+            return nullObject
+        }
+    }
+
     private func evalBangOperatorExpression(right: Object) -> Object {
         // 評価方針
         // boolの場合valueの反転したObjectを返す
@@ -69,10 +86,44 @@ class Evaluator {
             return falseObject
         }
     }
-    
+
     private func evalMinusPrefixOpratorExpression(right: Object) -> Object {
         guard right.type() == .integer else { return nullObject }
         guard let integer = right as? Integer else { return nullObject }
         return Integer(value: -integer.value)
+    }
+
+    private func evalIntegerInfixExpression(op: InfixExpression, _ left: Integer, _ right: Integer) -> Object {
+        switch op.token.type {
+        case .plus:
+            return left + right
+        case .minus:
+            return left - right
+        case .asterisk:
+            return left * right
+        case .slash:
+            return left / right
+        case .eq:
+            return left == right
+        case .notEq:
+            return left != right
+        case .gt:
+            return left > right
+        case .lt:
+            return left < right
+        default:
+            return nullObject
+        }
+    }
+
+    private func evalBooleanInfixExpression(op: InfixExpression, _ left: Boolean, _ right: Boolean) -> Object {
+        switch op.token.type {
+        case .eq:
+            return left == right
+        case .notEq:
+            return left != right
+        default:
+            return nullObject
+        }
     }
 }
