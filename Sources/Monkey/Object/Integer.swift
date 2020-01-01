@@ -13,8 +13,24 @@ struct Integer: Object {
     func type() -> ObjectType {
         return .integer
     }
-    
+
     func inspect() -> String {
         return value.description
+    }
+
+    static func +(lhs: Self, rhs: Self) -> Self {
+        return Integer(value: lhs.value + rhs.value)
+    }
+
+    static func -(lhs: Self, rhs: Self) -> Self {
+        return Integer(value: lhs.value - rhs.value)
+    }
+
+    static func *(lhs: Self, rhs: Self) -> Self {
+        return Integer(value: lhs.value * rhs.value)
+    }
+
+    static func /(lhs: Self, rhs: Self) -> Self {
+        return Integer(value: lhs.value / rhs.value)
     }
 }
