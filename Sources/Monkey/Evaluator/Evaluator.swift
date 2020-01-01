@@ -24,20 +24,19 @@ class Evaluator {
             guard let literal = node as? BoolLiteral else { return nil }
             return literal.value ? trueObject : falseObject
         // 文
-        case is Program:
-            guard let nd = node as? Program else { return nil }
+        case let nd as Program:
             return evalStatements(stmts: nd.statements)
-        case is ExpressionStatement:
-            guard let nd = node as? ExpressionStatement else { return nil }
+        case let nd as ExpressionStatement:
             return eval(node: nd.expr)
-       case is PrefixExpression:
-            guard let prefixOp = node as? PrefixExpression else { return nil }
+        case let prefixOp as PrefixExpression:
             guard let right = eval(node: prefixOp.right) else { return nil }
             return evalPrefixOperator(op: prefixOp, right: right)
-        case is InfixExpression:
-            guard let infixOp = node as? InfixExpression else { return nil }
+        case let infixOp as InfixExpression:
             guard let left = eval(node: infixOp.left), let right = eval(node: infixOp.right) else { return nil }
             return evalInfixOperator(op: infixOp, left, right)
+        case let prefixOp as PrefixExpression:
+            guard let right = eval(node: prefixOp.right) else { return nil }
+            return evalPrefixOperator(op: prefixOp, right: right)
         default:
             return nil
         }
