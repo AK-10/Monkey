@@ -23,6 +23,9 @@ class Evaluator {
             return eval(node: nd.expr)
         case let block as BlockStatement:
             return evalStatements(stmts: block.statements)
+        case let returnStmt as ReturnStatement:
+            guard let value = eval(node: returnStmt.returnValue) else { return nil }
+            return ReturnValue(value: value)
         // expression
         case is IntegerLiteral:
             guard let literal = node as? IntegerLiteral else { return nil }
@@ -44,8 +47,12 @@ class Evaluator {
     }
     
     func evalStatements(stmts: [Statement]) -> Object? {
-        guard let stmt = stmts.last else { return nil }
-        return eval(node: stmt)
+        for stmt in stmts {
+            if let result = eval(node: stmt) as? ReturnValue {
+                return result.value
+            }
+        }
+        return nil
     }
 
     func evalPrefixOperator(op: PrefixExpression, right: Object) -> Object? {
