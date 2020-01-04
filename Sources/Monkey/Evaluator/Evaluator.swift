@@ -16,27 +16,28 @@ class Evaluator {
     
     func eval(node: Node) -> Object? {
         switch node {
-        // 式
+        // statement
+        case let nd as Program:
+            return evalStatements(stmts: nd.statements)
+        case let nd as ExpressionStatement:
+            return eval(node: nd.expr)
+        case let block as BlockStatement:
+            return evalStatements(stmts: block.statements)
+        // expression
         case is IntegerLiteral:
             guard let literal = node as? IntegerLiteral else { return nil }
             return Integer(value: literal.value)
         case is BoolLiteral:
             guard let literal = node as? BoolLiteral else { return nil }
             return literal.value ? trueObject : falseObject
-        // 文
-        case let nd as Program:
-            return evalStatements(stmts: nd.statements)
-        case let nd as ExpressionStatement:
-            return eval(node: nd.expr)
         case let prefixOp as PrefixExpression:
             guard let right = eval(node: prefixOp.right) else { return nil }
             return evalPrefixOperator(op: prefixOp, right: right)
         case let infixOp as InfixExpression:
             guard let left = eval(node: infixOp.left), let right = eval(node: infixOp.right) else { return nil }
             return evalInfixOperator(op: infixOp, left, right)
-        case let prefixOp as PrefixExpression:
-            guard let right = eval(node: prefixOp.right) else { return nil }
-            return evalPrefixOperator(op: prefixOp, right: right)
+        case let ifExpr as IfExpression:
+            return evalIfExpression(ifExpr)
         default:
             return nil
         }
@@ -54,6 +55,7 @@ class Evaluator {
         case .minus:
             return evalMinusPrefixOpratorExpression(right: right)
         default:
+            // unavailable unary operator
             return nullObject
         }
     }
@@ -68,6 +70,7 @@ class Evaluator {
             guard let leftBoolean = left as? Boolean, let rightBoolean = right as? Boolean else { return nullObject }
             return evalBooleanInfixExpression(op: op, leftBoolean, rightBoolean)
         default:
+            // type error
             return nullObject
         }
     }
@@ -112,6 +115,7 @@ class Evaluator {
         case .lt:
             return left < right
         default:
+            // unavailable binary operator
             return nullObject
         }
     }
@@ -123,7 +127,30 @@ class Evaluator {
         case .notEq:
             return left != right
         default:
+            // unavailable binary operator
             return nullObject
+        }
+    }
+    
+    private func evalIfExpression(_ ifExpr: IfExpression) -> Object {
+        guard let condition = eval(node: ifExpr.condition) else { return nullObject }
+        
+        if isTruthy(obj: condition) {
+            return eval(node: ifExpr.consequence) ?? nullObject
+        } else {
+            guard let alt = ifExpr.alternative else { return nullObject }
+            return eval(node: alt) ?? nullObject
+        }
+    }
+    
+    private func isTruthy(obj: Object) -> Bool {
+        switch obj {
+        case let boolObj as Boolean:
+            return boolObj.value
+        case is Null:
+            return false
+        default:
+            return true
         }
     }
 }
