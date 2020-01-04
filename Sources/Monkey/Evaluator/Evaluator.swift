@@ -13,7 +13,7 @@ class Evaluator {
     final let trueObject = Boolean(value: true)
     final let falseObject = Boolean(value: false)
     final let nullObject = Null()
-    
+
     func eval(node: Node) -> Object? {
         switch node {
         // statement
