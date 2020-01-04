@@ -11,6 +11,7 @@ enum ObjectType: String {
     case integer = "INTEGER"
     case boolean = "BOOLEAN"
     case null = "NULL"
+    case returnValue = "RETURN_VALUE"
 }
 
 protocol Object {
