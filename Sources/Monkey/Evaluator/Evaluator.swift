@@ -72,23 +72,25 @@ class Evaluator {
         case .minus:
             return evalMinusPrefixOpratorExpression(right: right)
         default:
-            // unavailable unary operator
-            return nullObject
+            return generateError(format: "unknown operator: %@%@", op.description, right.type().rawValue)
         }
+        
     }
 
     func evalInfixOperator(op: InfixExpression, _ left: Object, _ right: Object) -> Object? {
-        switch (left.type(), right.type()) {
+        switch (left, right) {
             
-        case (.integer, .integer):
-            guard let leftInteger = left as? Integer, let rightInteger = right as? Integer else { return nullObject }
+        case let (leftInteger as Integer, rightInteger as Integer):
             return evalIntegerInfixExpression(op: op, leftInteger, rightInteger)
-        case (.boolean, .boolean):
-            guard let leftBoolean = left as? Boolean, let rightBoolean = right as? Boolean else { return nullObject }
+        case let (leftBoolean as Boolean, rightBoolean as Boolean):
             return evalBooleanInfixExpression(op: op, leftBoolean, rightBoolean)
         default:
-            // type error
-            return nullObject
+            switch op.token.type {
+            case .plus, .minus, .asterisk, .slash, .lt, .gt, .eq, .notEq:
+                return generateError(format: "type mismatch: %@ %@ %@", left.type().rawValue, op.op, right.type().rawValue)
+            default:
+                return generateError(format: "unknown operator: %@ %@ %@", left.type().rawValue, op.op, right.type().rawValue)
+            }
         }
     }
 
@@ -171,9 +173,12 @@ class Evaluator {
         }
     }
 
-    private func generateError(format: String, args: CustomStringConvertible...) -> ErrorObject {
-        let descriptions = args.map { elem in elem.description }
-        let errorMessage = String(format: format, descriptions)
-        return ErrorObject(message: errorMessage)
+    private func generateError(format: String, _ args: CVarArg...) -> ErrorObject {
+//        let descriptions = args.map { elem in elem.description }
+//        let errorMessage = String(format: format, descriptions)
+        // どうなるかわからない
+        let msg = String(format: format, args)
+        return ErrorObject(message: msg)
+
     }
 }
