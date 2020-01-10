@@ -27,12 +27,10 @@ class Evaluator {
             guard let value = eval(node: returnStmt.returnValue) else { return nil }
             return ReturnValue(value: value)
         // expression
-        case is IntegerLiteral:
-            guard let literal = node as? IntegerLiteral else { return nil }
-            return Integer(value: literal.value)
-        case is BoolLiteral:
-            guard let literal = node as? BoolLiteral else { return nil }
-            return literal.value ? trueObject : falseObject
+        case let intLiteral as IntegerLiteral:
+            return Integer(value: intLiteral.value)
+        case let boolLiteral as BoolLiteral:
+            return boolLiteral.value ? trueObject : falseObject
         case let prefixOp as PrefixExpression:
             guard let right = eval(node: prefixOp.right) else { return nil }
             return evalPrefixOperator(op: prefixOp, right: right)
@@ -150,10 +148,10 @@ class Evaluator {
             return nullObject
         }
     }
-    
+
     private func evalIfExpression(_ ifExpr: IfExpression) -> Object {
         guard let condition = eval(node: ifExpr.condition) else { return nullObject }
-        
+
         if isTruthy(obj: condition) {
             return eval(node: ifExpr.consequence) ?? nullObject
         } else {
@@ -161,7 +159,7 @@ class Evaluator {
             return eval(node: alt) ?? nullObject
         }
     }
-    
+
     private func isTruthy(obj: Object) -> Bool {
         switch obj {
         case let boolObj as Boolean:
@@ -171,5 +169,11 @@ class Evaluator {
         default:
             return true
         }
+    }
+
+    private func generateError(format: String, args: CustomStringConvertible...) -> ErrorObject {
+        let descriptions = args.map { elem in elem.description }
+        let errorMessage = String(format: format, descriptions)
+        return ErrorObject(message: errorMessage)
     }
 }
