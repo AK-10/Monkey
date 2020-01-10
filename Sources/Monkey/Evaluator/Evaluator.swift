@@ -13,16 +13,19 @@ class Evaluator {
     final let trueObject = Boolean(value: true)
     final let falseObject = Boolean(value: false)
     final let nullObject = Null()
-    
+
     func eval(node: Node) -> Object? {
         switch node {
         // statement
-        case let nd as Program:
-            return evalStatements(stmts: nd.statements)
+        case let prog as Program:
+            return evalProgram(program: prog)
         case let nd as ExpressionStatement:
             return eval(node: nd.expr)
         case let block as BlockStatement:
-            return evalStatements(stmts: block.statements)
+            return evalBlockStatement(block: block)
+        case let returnStmt as ReturnStatement:
+            guard let value = eval(node: returnStmt.returnValue) else { return nil }
+            return ReturnValue(value: value)
         // expression
         case is IntegerLiteral:
             guard let literal = node as? IntegerLiteral else { return nil }
@@ -43,9 +46,25 @@ class Evaluator {
         }
     }
     
-    func evalStatements(stmts: [Statement]) -> Object? {
-        guard let stmt = stmts.last else { return nil }
-        return eval(node: stmt)
+    func evalProgram(program: Program) -> Object? {
+        for stmt in program.statements {
+            if let result = eval(node: stmt) as? ReturnValue {
+                return result.value
+            }
+        }
+        return nil
+    }
+    
+    func evalBlockStatement(block: BlockStatement) -> Object? {
+        var result: Object?
+        for stmt in block.statements {
+            result = eval(node: stmt)
+            if let res = result, res.type() == .returnValue {
+                return res
+            }
+        }
+        
+        return result
     }
 
     func evalPrefixOperator(op: PrefixExpression, right: Object) -> Object? {
