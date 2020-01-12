@@ -85,12 +85,7 @@ class Evaluator {
         case let (leftBoolean as Boolean, rightBoolean as Boolean):
             return evalBooleanInfixExpression(op: op, leftBoolean, rightBoolean)
         default:
-            switch op.token.type {
-            case .plus, .minus, .asterisk, .slash, .lt, .gt, .eq, .notEq:
-                return generateError(format: "type mismatch: %@ %@ %@", left.type().rawValue, op.op, right.type().rawValue)
-            default:
-                return generateError(format: "unknown operator: %@ %@ %@", left.type().rawValue, op.op, right.type().rawValue)
-            }
+            return generateError(format: "type mismatch: %@ %@ %@", left.type().rawValue, op.op, right.type().rawValue)
         }
     }
 
@@ -134,8 +129,7 @@ class Evaluator {
         case .lt:
             return left < right
         default:
-            // unavailable binary operator
-            return nullObject
+            return generateError(format: "unknown operator: %@ %@ %@", left.type().rawValue, op.op, right.type().rawValue)
         }
     }
 
@@ -146,8 +140,7 @@ class Evaluator {
         case .notEq:
             return left != right
         default:
-            // unavailable binary operator
-            return nullObject
+            return generateError(format: "unknown operator: %@ %@ %@", left.type().rawValue, op.op, right.type().rawValue)
         }
     }
 
