@@ -46,8 +46,14 @@ class Evaluator {
     
     func evalProgram(program: Program) -> Object? {
         for stmt in program.statements {
-            if let result = eval(node: stmt) as? ReturnValue {
-                return result.value
+            let result = eval(node: stmt)
+            switch result {
+            case let returnValue as ReturnValue:
+                return returnValue.value
+            case is ErrorObject:
+                return result
+            default:
+                break
             }
         }
         return nil
