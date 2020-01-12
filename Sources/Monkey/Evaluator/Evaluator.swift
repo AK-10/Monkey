@@ -63,8 +63,11 @@ class Evaluator {
         var result: Object?
         for stmt in block.statements {
             result = eval(node: stmt)
-            if let res = result, res.type() == .returnValue {
-                return res
+            switch result {
+            case is ReturnValue, is ErrorObject:
+                return result
+            default:
+                break
             }
         }
         
