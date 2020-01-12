@@ -28,11 +28,6 @@ class Evaluator {
             if isError(obj: value) { return value }
             
             return ReturnValue(value: value)
-        case let letStmt as LetStatement:
-            let value = eval(node: letStmt.value)
-            if isError(obj: value) { return value }
-            
-            return
         // expression
         case let intLiteral as IntegerLiteral:
             return Integer(value: intLiteral.value)
