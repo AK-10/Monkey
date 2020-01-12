@@ -15,7 +15,6 @@ class Evaluator {
     final let nullObject = Null()
 
     func eval(node: Node) -> Object {
-        
         switch node {
         // statement
         case let prog as Program:
@@ -54,18 +53,19 @@ class Evaluator {
     }
     
     func evalProgram(program: Program) -> Object {
+        var result: Object?
         for stmt in program.statements {
-            let result = eval(node: stmt)
+            result = eval(node: stmt)
             switch result {
             case let returnValue as ReturnValue:
                 return returnValue.value
-            case is ErrorObject:
-                return result
+            case let err as ErrorObject:
+                return err
             default:
                 break
             }
         }
-        return generateError(format: "statement not found")
+        return result ?? generateError(format: "statement not found")
     }
     
     func evalBlockStatement(block: BlockStatement) -> Object {
@@ -91,7 +91,7 @@ class Evaluator {
         case .minus:
             return evalMinusPrefixOpratorExpression(right: right)
         default:
-            return generateError(format: "unknown operator: %@%@", op.description, right.type().rawValue)
+            return generateError(format: "unknown operator: %@%@", op.op, right.type().rawValue)
         }
         
     }
@@ -124,10 +124,13 @@ class Evaluator {
     }
 
     private func evalMinusPrefixOpratorExpression(right: Object) -> Object {
-        guard right.type() == .integer else { return nullObject }
-        guard let integer = right as? Integer else { return nullObject }
-        return Integer(value: -integer.value)
-    }
+        switch right {
+        case let _right as Integer:
+            return Integer(value: -_right.value)
+        default:
+            return generateError(format: "type mismatch: -%@", right.type().rawValue)
+        }
+   }
 
     private func evalIntegerInfixExpression(op: InfixExpression, _ left: Integer, _ right: Integer) -> Object {
         switch op.token.type {
