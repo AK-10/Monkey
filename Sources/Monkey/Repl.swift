@@ -22,12 +22,7 @@ struct Repl {
                     continue
                 }
                 let evaluated = Evaluator().eval(node: program)
-                switch evaluated {
-                case .some(let ev):
-                    print(ev.inspect())
-                case .none:
-                    print("evaluate failed")
-                }
+                print(evaluated.inspect())
             }
         }
     }

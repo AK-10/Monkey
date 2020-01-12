@@ -14,7 +14,8 @@ class Evaluator {
     final let falseObject = Boolean(value: false)
     final let nullObject = Null()
 
-    func eval(node: Node) -> Object? {
+    func eval(node: Node) -> Object {
+        
         switch node {
         // statement
         case let prog as Program:
@@ -24,73 +25,86 @@ class Evaluator {
         case let block as BlockStatement:
             return evalBlockStatement(block: block)
         case let returnStmt as ReturnStatement:
-            guard let value = eval(node: returnStmt.returnValue) else { return nil }
+            let value = eval(node: returnStmt.returnValue)
+            if isError(obj: value) { return value }
+            
             return ReturnValue(value: value)
         // expression
-        case is IntegerLiteral:
-            guard let literal = node as? IntegerLiteral else { return nil }
-            return Integer(value: literal.value)
-        case is BoolLiteral:
-            guard let literal = node as? BoolLiteral else { return nil }
-            return literal.value ? trueObject : falseObject
+        case let intLiteral as IntegerLiteral:
+            return Integer(value: intLiteral.value)
+        case let boolLiteral as BoolLiteral:
+            return boolLiteral.value ? trueObject : falseObject
         case let prefixOp as PrefixExpression:
-            guard let right = eval(node: prefixOp.right) else { return nil }
+            let right = eval(node: prefixOp.right)
+            if isError(obj: right) { return right }
+            
             return evalPrefixOperator(op: prefixOp, right: right)
         case let infixOp as InfixExpression:
-            guard let left = eval(node: infixOp.left), let right = eval(node: infixOp.right) else { return nil }
+            let left = eval(node: infixOp.left)
+            let right = eval(node: infixOp.right)
+            if isError(obj: left) { return left }
+            if isError(obj: right) { return right }
+            
             return evalInfixOperator(op: infixOp, left, right)
         case let ifExpr as IfExpression:
             return evalIfExpression(ifExpr)
         default:
-            return nil
+            return generateError(format: "unknown error")
         }
     }
     
-    func evalProgram(program: Program) -> Object? {
+    func evalProgram(program: Program) -> Object {
         for stmt in program.statements {
-            if let result = eval(node: stmt) as? ReturnValue {
-                return result.value
+            let result = eval(node: stmt)
+            switch result {
+            case let returnValue as ReturnValue:
+                return returnValue.value
+            case is ErrorObject:
+                return result
+            default:
+                break
             }
         }
-        return nil
+        return generateError(format: "statement not found")
     }
     
-    func evalBlockStatement(block: BlockStatement) -> Object? {
+    func evalBlockStatement(block: BlockStatement) -> Object {
         var result: Object?
         for stmt in block.statements {
             result = eval(node: stmt)
-            if let res = result, res.type() == .returnValue {
+            switch result {
+            case let res as ReturnValue:
                 return res
+            case let err as ErrorObject:
+                return err
+            default:
+                break
             }
         }
-        
-        return result
+        return result ?? nullObject
     }
 
-    func evalPrefixOperator(op: PrefixExpression, right: Object) -> Object? {
+    func evalPrefixOperator(op: PrefixExpression, right: Object) -> Object {
         switch op.token.type {
         case .bang:
             return evalBangOperatorExpression(right: right)
         case .minus:
             return evalMinusPrefixOpratorExpression(right: right)
         default:
-            // unavailable unary operator
-            return nullObject
+            return generateError(format: "unknown operator: %@%@", op.description, right.type().rawValue)
         }
+        
     }
 
-    func evalInfixOperator(op: InfixExpression, _ left: Object, _ right: Object) -> Object? {
-        switch (left.type(), right.type()) {
+    func evalInfixOperator(op: InfixExpression, _ left: Object, _ right: Object) -> Object {
+        switch (left, right) {
             
-        case (.integer, .integer):
-            guard let leftInteger = left as? Integer, let rightInteger = right as? Integer else { return nullObject }
+        case let (leftInteger as Integer, rightInteger as Integer):
             return evalIntegerInfixExpression(op: op, leftInteger, rightInteger)
-        case (.boolean, .boolean):
-            guard let leftBoolean = left as? Boolean, let rightBoolean = right as? Boolean else { return nullObject }
+        case let (leftBoolean as Boolean, rightBoolean as Boolean):
             return evalBooleanInfixExpression(op: op, leftBoolean, rightBoolean)
         default:
-            // type error
-            return nullObject
+            return generateError(format: "type mismatch: %@ %@ %@", left.type().rawValue, op.op, right.type().rawValue)
         }
     }
 
@@ -134,8 +148,7 @@ class Evaluator {
         case .lt:
             return left < right
         default:
-            // unavailable binary operator
-            return nullObject
+            return generateError(format: "unknown operator: %@ %@ %@", left.type().rawValue, op.op, right.type().rawValue)
         }
     }
 
@@ -146,22 +159,22 @@ class Evaluator {
         case .notEq:
             return left != right
         default:
-            // unavailable binary operator
-            return nullObject
+            return generateError(format: "unknown operator: %@ %@ %@", left.type().rawValue, op.op, right.type().rawValue)
         }
     }
-    
+
     private func evalIfExpression(_ ifExpr: IfExpression) -> Object {
-        guard let condition = eval(node: ifExpr.condition) else { return nullObject }
-        
+        let condition = eval(node: ifExpr.condition)
+        if isError(obj: condition) { return condition }
+
         if isTruthy(obj: condition) {
-            return eval(node: ifExpr.consequence) ?? nullObject
+            return eval(node: ifExpr.consequence)
         } else {
             guard let alt = ifExpr.alternative else { return nullObject }
-            return eval(node: alt) ?? nullObject
+            return eval(node: alt)
         }
     }
-    
+
     private func isTruthy(obj: Object) -> Bool {
         switch obj {
         case let boolObj as Boolean:
@@ -171,5 +184,17 @@ class Evaluator {
         default:
             return true
         }
+    }
+
+    private func generateError(format: String, _ args: CVarArg...) -> ErrorObject {
+//        let descriptions = args.map { elem in elem.description }
+//        let errorMessage = String(format: format, descriptions)
+        // どうなるかわからない
+        let msg = String(format: format, args)
+        return ErrorObject(message: msg)
+    }
+    
+    private func isError(obj: Object) -> Bool {
+        return obj is ErrorObject
     }
 }
