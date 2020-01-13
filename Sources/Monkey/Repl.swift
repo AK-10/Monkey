@@ -15,13 +15,14 @@ struct Repl {
                 if input == "bye" { exit(0) }
                 let lexer = Lexer(input)
                 let parser = Parser(lexer)
+                let env = Environment()
                 let program = parser.parseProgram()
                 if parser.errors.count > 0 {
                     print("error detected:")
                     printParserErrors(errors: parser.errors)
                     continue
                 }
-                let evaluated = Evaluator().eval(node: program)
+                let evaluated = Evaluator().eval(node: program, env: env)
                 print(evaluated.inspect())
             }
         }
