@@ -16,6 +16,7 @@ class Environment {
    
     func set(name: String, value: Object) -> Object {
         store[name] = value
+        print(store)
         return value
     }
 }
