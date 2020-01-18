@@ -14,31 +14,31 @@ class Evaluator {
     final let falseObject = Boolean(value: false)
     final let nullObject = Null()
 
-    func eval(node: Node, env: inout Environment) -> Object {
-        print(env.store)
+    func eval(node: Node, env: Environment) -> Object {
         switch node {
         // statement
         case let prog as Program:
             return evalProgram(program: prog, env: env)
 
         case let nd as ExpressionStatement:
-            return eval(node: nd.expr, env: &env)
+            return eval(node: nd.expr, env: env)
 
         case let block as BlockStatement:
             return evalBlockStatement(block: block, env: env)
 
         case let returnStmt as ReturnStatement:
-            let value = eval(node: returnStmt.returnValue, env: &env)
+            let value = eval(node: returnStmt.returnValue, env: env)
             if isError(obj: value) { return value }
             
             return ReturnValue(value: value)
 
         case let letStmt as LetStatement:
             let name = letStmt.name.value
-            let value = eval(node: letStmt.value, env: &env)
+            let value = eval(node: letStmt.value, env: env)
             if isError(obj: value) { return value }
-            
-            return env.set(name: name, value: value)
+          
+            env.store[name] = value
+            return value
 
         // expression
         case let intLiteral as IntegerLiteral:
@@ -48,14 +48,14 @@ class Evaluator {
             return boolLiteral.value ? trueObject : falseObject
 
         case let prefixOp as PrefixExpression:
-            let right = eval(node: prefixOp.right, env: &env)
+            let right = eval(node: prefixOp.right, env: env)
             if isError(obj: right) { return right }
             
             return evalPrefixOperator(op: prefixOp, right: right)
 
         case let infixOp as InfixExpression:
-            let left = eval(node: infixOp.left, env: &env)
-            let right = eval(node: infixOp.right, env: &env)
+            let left = eval(node: infixOp.left, env: env)
+            let right = eval(node: infixOp.right, env: env)
             if isError(obj: left) { return left }
             if isError(obj: right) { return right }
             
@@ -75,7 +75,7 @@ class Evaluator {
     func evalProgram(program: Program, env: Environment) -> Object {
         var result: Object?
         for stmt in program.statements {
-            result = eval(node: stmt, env: &env)
+            result = eval(node: stmt, env: env)
             switch result {
             case let returnValue as ReturnValue:
                 return returnValue.value
@@ -88,10 +88,10 @@ class Evaluator {
         return result ?? generateError(format: "statement not found")
     }
     
-    func evalBlockStatement(block: BlockStatement, env: inout Environment) -> Object {
+    func evalBlockStatement(block: BlockStatement, env: Environment) -> Object {
         var result: Object?
         for stmt in block.statements {
-            result = eval(node: stmt, env: &env)
+            result = eval(node: stmt, env: env)
             switch result {
             case let res as ReturnValue:
                 return res
@@ -185,15 +185,15 @@ class Evaluator {
         }
     }
 
-    private func evalIfExpression(_ ifExpr: IfExpression, env: inout Environment) -> Object {
-        let condition = eval(node: ifExpr.condition, env: &env)
+    private func evalIfExpression(_ ifExpr: IfExpression, env: Environment) -> Object {
+        let condition = eval(node: ifExpr.condition, env: env)
         if isError(obj: condition) { return condition }
 
         if isTruthy(obj: condition) {
-            return eval(node: ifExpr.consequence, env: &env)
+            return eval(node: ifExpr.consequence, env: env)
         } else {
             guard let alt = ifExpr.alternative else { return nullObject }
-            return eval(node: alt, env: &env)
+            return eval(node: alt, env: env)
         }
     }
     

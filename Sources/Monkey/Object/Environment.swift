@@ -7,16 +7,15 @@
 
 import Foundation
 
-class Environment {
+final class Environment {
     var store: [String:Object] = [:]
-    
+
     func get(name: String) -> Object? {
         return store[name]
     }
-   
+
     func set(name: String, value: Object) -> Object {
         store[name] = value
-        print(store)
         return value
     }
 }
