@@ -37,8 +37,7 @@ class Evaluator {
             let value = eval(node: letStmt.value, env: env)
             if isError(obj: value) { return value }
           
-            env.store[name] = value
-            return value
+            return env.set(name: name, value: value)
 
         // expression
         case let intLiteral as IntegerLiteral:
