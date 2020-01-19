@@ -9,25 +9,22 @@ import Foundation
 
 final class Environment {
     var store: [String:Object] = [:]
+    var outer: Environment? = nil
 
     init() {
         self.store = [:]
     }
 
-    init(store: [String:Object]) {
-        self.store = store
+    init(outer: Environment) {
+        self.outer = outer
     }
 
     func get(name: String) -> Object? {
-        return store[name]
+        store[name] ?? outer?.get(name: name)
     }
 
     func set(name: String, value: Object) -> Object {
         store[name] = value
         return value
-    }
-
-    func copy() -> Environment {
-        return Environment(store: self.store)
     }
 }

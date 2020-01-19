@@ -65,6 +65,25 @@ class Evaluator {
 
         case let id as Identifier:
             return evalIdentifier(id: id, env: env)
+            
+        case let functionLit as FunctionLiteral:
+            let params = functionLit.parameters
+            let body = functionLit.body
+            return Function(parameters: params, body: body, env: env)
+
+        case let callExpr as CallExpression:
+            let function = eval(node: callExpr.function, env: env) // id またはfunction literalが入る
+            if isError(obj: function) {
+                return function
+            }
+            // 引数の評価
+            let args = evalExpressions(exprs: callExpr.arguments, env: env)
+            // 引数で評価エラーが起きた場合，以下の条件になる
+            if args.count == 1 && isError(obj: args[0]) {
+                return args[0]
+            }
+            
+            return applyFunction(fn: function, args: args)
 
         default:
             return generateError(format: "unknown error")
@@ -204,6 +223,40 @@ class Evaluator {
         case .none:
             return generateError(format: "identifier not found: %@", id.value)
         }
+    }
+    
+    private func evalExpressions(exprs: [Expression], env: Environment) -> [Object] {
+        let evaluatedList = exprs.map { eval(node: $0, env: env) }
+        let erroredObj = evaluatedList.first(where: { isError(obj: $0) })
+        switch erroredObj {
+        case .some(let obj):
+            return [obj]
+        case .none:
+            return evaluatedList
+        }
+    }
+    
+    private func applyFunction(fn: Object, args: [Object]) -> Object {
+        guard let fnObj = fn as? Function else { return generateError(format: "not a function: %@", fn.type().rawValue) }
+        let extendedEnv = extendFunctionEnv(fn: fnObj, args: args)
+        let evaluated = eval(node: fnObj.body, env: extendedEnv)
+
+        return unwrapReturnValue(obj: evaluated)
+    }
+    
+    private func extendFunctionEnv(fn: Function, args: [Object]) -> Environment {
+        let env = Environment(outer: fn.env)
+        zip(fn.parameters, args).forEach { (ident, obj) in
+            _ = env.set(name: ident.value, value: obj) }
+        return env
+    }
+    
+    private func unwrapReturnValue(obj: Object) -> Object {
+        guard let returnValue = obj as? ReturnValue else {
+            return obj
+        }
+        
+        return returnValue.value
     }
 
     private func isTruthy(obj: Object) -> Bool {
