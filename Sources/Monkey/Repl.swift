@@ -9,20 +9,24 @@ import Foundation
 
 struct Repl {
     public func start() {
+        let env = Environment()
         while true {
             print("Monkey >> ", terminator: "")
             if let input = readLine() {
                 if input == "bye" { exit(0) }
+
                 let lexer = Lexer(input)
                 let parser = Parser(lexer)
+
                 let program = parser.parseProgram()
+
                 if parser.errors.count > 0 {
                     print("error detected:")
                     printParserErrors(errors: parser.errors)
                     continue
                 }
-                print("parse succeeded:")
-                print(program.description)
+                let evaluated = Evaluator().eval(node: program, env: env)
+                print(evaluated.inspect())
             }
         }
     }

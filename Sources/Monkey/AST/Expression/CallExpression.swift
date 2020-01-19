@@ -8,8 +8,8 @@
 import Foundation
 
 struct CallExpression: Expression {
-    let token: Token
-    let function: Expression
+    let token: Token // `(` token
+    let function: Expression // identifer or function literal
     let arguments: [Expression]
     
     var description: String {
