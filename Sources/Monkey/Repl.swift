@@ -25,7 +25,6 @@ struct Repl {
                     printParserErrors(errors: parser.errors)
                     continue
                 }
-
                 let evaluated = Evaluator().eval(node: program, env: env)
                 print(evaluated.inspect())
             }
