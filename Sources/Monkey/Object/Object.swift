@@ -12,6 +12,7 @@ enum ObjectType: String {
     case boolean = "BOOLEAN"
     case null = "NULL"
     case returnValue = "RETURN_VALUE"
+    case function = "FUNCTION"
     case error = "ERROR"
 }
 
