@@ -191,6 +191,10 @@ callsFunction(2, 3, fn(x, y){ x + y; })
 
 - todoの削除(2019/12/8)
   - letのパースとreturnのパースで値をdummyにしていたものをparseExpressionで得られた値に変更
+  
+
+- 以降，サボった
+- 評価器の実装は1月19日に終了
 
 ## swiftPM
 - `$ mkdir {projectName}`: プロジェクトディレクトリ作成
